@@ -1,0 +1,6 @@
+{
+  "name": "Any's Beauty Corner",
+  "description": "Your ultimate skin care, haircare, and makeup companion. Purchase 100% authentic cosmetic goods with Google authentication and get real-time consultations from our conversational AI beauty advisor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

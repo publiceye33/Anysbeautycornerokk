@@ -1,0 +1,24 @@
+@import "tailwindcss";
+
+@theme {
+  /* Dynamic brand overrides for Any's Beauty Corner's exact website pink theme #EB96A6 */
+  --color-rose-50: #fef6f7;
+  --color-rose-100: #fdecf0;
+  --color-rose-200: #fbd2da;
+  --color-rose-300: #f8abb9;
+  --color-rose-400: #f38d9f;
+  --color-rose-500: #EB96A6;
+  --color-rose-600: #db7385;
+  --color-rose-700: #be5165;
+  --color-rose-800: #9e3f52;
+  --color-rose-900: #833544;
+  --color-rose-950: #521c26;
+  --color-rose-955: #42131b;
+
+  --color-red-50: #fef6f7;
+  --color-red-500: #EB96A6;
+  --color-red-650: #db7385;
+  --color-red-600: #db7385;
+
+  --color-lipstick: #EB96A6;
+}
