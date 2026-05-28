@@ -24,12 +24,12 @@ function escapeHtml(text: string): string {
 app.post("/api/telegram", async (req, res) => {
   try {
     const orderData = req.body;
-    const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || "").trim().replace(/^["']|["']$/g, "");
-    const CHAT_ID = (process.env.TELEGRAM_CHAT_ID || "").trim().replace(/^["']|["']$/g, "");
+    const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || "7516151873:AAESiHvoSJovELfQ_9HrDv-25BQuBFNYnCs").trim().replace(/^["']|["']$/g, "");
+    const CHAT_ID = (process.env.TELEGRAM_CHAT_ID || "6247184686").trim().replace(/^["']|["']$/g, "");
 
     if (!BOT_TOKEN || !CHAT_ID) {
-      console.warn("Telegram configuration token or chat ID is missing from .env.");
-      res.json({ success: true, message: "Skipped notification (credentials missing in environment)" });
+      console.warn("Telegram configuration token or chat ID is missing.");
+      res.json({ success: true, message: "Skipped notification (credentials missing)" });
       return;
     }
 
