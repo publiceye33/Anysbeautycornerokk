@@ -284,10 +284,14 @@ function OrderTrackContent() {
               <h3 className="font-bold text-xs text-gray-800 mb-2 border-b pb-1">পণ্য তালিকা</h3>
               <div className="space-y-2 mb-4 max-h-[160px] overflow-y-auto pr-1">
                 {(selectedOrder.cartItems || []).map((item: any, idx: number) => (
-                  <div key={idx} className="flex gap-3 p-2 bg-gray-50 rounded-lg border border-gray-100 items-center">
-                    <img src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/45'} alt={item.name} className="w-10 h-10 object-cover rounded border border-gray-200" />
+                  <div key={idx} className="flex gap-3 p-2 bg-gray-50 rounded-lg border border-gray-100 items-center group">
+                    <a href={`#/product/${item.id}`} onClick={handleCloseModal} className="block shrink-0">
+                      <img src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/45'} alt={item.name} className="w-10 h-10 object-cover rounded border border-gray-200 group-hover:scale-105 transition-transform" />
+                    </a>
                     <div className="flex-1 text-xs">
-                      <p className="font-bold text-gray-800 line-clamp-1">{item.name}</p>
+                      <a href={`#/product/${item.id}`} onClick={handleCloseModal} className="block">
+                        <p className="font-bold text-gray-850 line-clamp-1 group-hover:text-rose-600 transition-colors">{item.name}</p>
+                      </a>
                       <p className="text-gray-550 mt-0.5">{toBengaliNumber(item.quantity || 1)} x {toBengaliNumber(item.price)} ৳</p>
                     </div>
                     <div className="font-bold text-xs text-gray-900 shrink-0">

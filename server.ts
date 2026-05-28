@@ -48,7 +48,8 @@ app.post("/api/telegram", async (req, res) => {
       subTotal = '0',
       deliveryFee = '0',
       totalAmount = '0',
-      cartItems = []
+      cartItems = [],
+      hostOrigin = ""
     } = orderData;
 
     // Use safety escaping on all user-supplied raw strings to prevent HTML malformation errors
@@ -60,6 +61,19 @@ app.post("/api/telegram", async (req, res) => {
     const safeNote = escapeHtml(deliveryNote);
     const safePaymentNumber = escapeHtml(paymentNumber);
     const safeTransactionId = escapeHtml(transactionId);
+
+    // Determine clean client-facing storefront base url
+    const requestReferer = req.headers.referer || "";
+    const activeOrigin = hostOrigin || requestReferer;
+    let cleanOrigin = "";
+    if (activeOrigin) {
+      try {
+        const urlObj = new URL(activeOrigin);
+        cleanOrigin = urlObj.origin;
+      } catch (e) {
+        // Skip
+      }
+    }
 
     // Determine readable payment method translation
     const finalPaymentMethod = deliveryPaymentMethod || paymentMethod || 'cod';
@@ -109,6 +123,12 @@ app.post("/api/telegram", async (req, res) => {
     messageText += `<b>সাব-টোটাল:</b> ${Number(subTotal).toFixed(0)} টাকা\n`;
     messageText += `<b>ডেলিভারি ফি:</b> ${Number(deliveryFee).toFixed(0)} টাকা\n`;
     messageText += `<b>মোট মূল্য:</b> <b>${Number(totalAmount).toFixed(0)} টাকা</b>\n`;
+
+    if (cleanOrigin) {
+      messageText += `➖➖➖➖➖➖➖➖➖➖\n`;
+      messageText += `<b>🔗 অর্ডার ট্র্যাক করার লিংক:</b>\n`;
+      messageText += `<a href="${cleanOrigin}/#/order-track?orderId=${escapeHtml(orderId)}">এখানে ক্লিক করুন</a>\n`;
+    }
 
     const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
     const tgResponse = await fetch(telegramUrl, {

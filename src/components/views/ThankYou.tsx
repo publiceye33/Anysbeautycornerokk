@@ -132,14 +132,18 @@ function ThankYouContent() {
                 <span className="text-[10px] font-extrabold text-gray-400 uppercase tracking-widest block mb-3">পণ্য তালিকা</span>
                 <div className="divide-y divide-gray-50 max-h-56 overflow-y-auto pr-1">
                   {(order.cartItems || []).map((item: any, idx: number) => (
-                    <div key={idx} className="flex gap-4 items-center py-3 first:pt-0 last:pb-0">
-                      <img 
-                        src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/60'} 
-                        alt={item.name} 
-                        className="w-11 h-11 object-cover rounded-lg border border-gray-100 shrink-0" 
-                      />
+                    <div key={idx} className="flex gap-4 items-center py-3 first:pt-0 last:pb-0 group">
+                      <a href={`#/product/${item.id}`} className="block shrink-0">
+                        <img 
+                          src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/60'} 
+                          alt={item.name} 
+                          className="w-11 h-11 object-cover rounded-lg border border-gray-100 group-hover:scale-105 transition-transform" 
+                        />
+                      </a>
                       <div className="flex-1 text-xs">
-                        <h4 className="font-bold text-gray-805 line-clamp-1">{item.name}</h4>
+                        <a href={`#/product/${item.id}`} className="block">
+                          <h4 className="font-bold text-gray-805 line-clamp-1 group-hover:text-rose-600 transition-colors">{item.name}</h4>
+                        </a>
                         <p className="text-gray-450 mt-0.5">{toBengaliNumber(item.quantity || 1)} x {toBengaliNumber(item.price)} ৳</p>
                       </div>
                       <div className="text-xs font-bold text-gray-900 shrink-0">

@@ -87,16 +87,18 @@ export default function CartSidebar() {
                       key={item.id} 
                       className="flex gap-4 p-4 bg-white border border-gray-100 rounded-2xl shadow-sm hover:shadow-md transition-shadow group"
                     >
-                      <div className="relative w-20 h-20 flex-shrink-0">
+                      <a href={`#/product/${item.id}`} onClick={() => setIsCartOpen(false)} className="relative w-20 h-20 flex-shrink-0 block">
                         <img 
                           src={displayImage} 
                           alt={item.name} 
-                          className="w-full h-full object-cover rounded-xl border border-gray-50"
+                          className="w-full h-full object-cover rounded-xl border border-gray-50 group-hover:scale-105 transition-transform duration-300"
                         />
-                      </div>
+                      </a>
                       <div className="flex-1 flex flex-col justify-between py-0.5">
                         <div className="flex justify-between items-start gap-2">
-                          <h3 className="font-medium text-gray-950 text-sm line-clamp-1 group-hover:text-rose-500 transition-colors">{item.name}</h3>
+                          <a href={`#/product/${item.id}`} onClick={() => setIsCartOpen(false)} className="block">
+                            <h3 className="font-medium text-gray-950 text-sm line-clamp-1 group-hover:text-rose-500 transition-colors">{item.name}</h3>
+                          </a>
                           <button 
                             onClick={() => removeFromCart(item.id)}
                             className="text-gray-300 hover:text-red-500 p-1 transition-colors"

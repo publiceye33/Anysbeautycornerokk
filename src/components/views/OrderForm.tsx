@@ -123,7 +123,7 @@ function OrderFormContent() {
           await fetch('/api/telegram', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData)
+            body: JSON.stringify({ ...orderData, hostOrigin: window.location.origin })
           });
         } catch (e) {
           console.error("Failed to send telegram msg", e);
@@ -240,10 +240,14 @@ function OrderFormContent() {
           
           <div className="space-y-4 mb-6 max-h-60 overflow-y-auto no-scrollbar pr-2">
             {itemsToOrder.map((item: any, idx: number) => (
-              <div key={idx} className="flex gap-4 border-b border-gray-50 pb-4">
-                <img src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/60'} alt={item.name} className="w-16 h-16 object-cover rounded-lg border border-gray-100" />
+              <div key={idx} className="flex gap-4 border-b border-gray-50 pb-4 group">
+                <a href={`#/product/${item.id}`} className="block w-16 h-16 flex-shrink-0">
+                  <img src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/60'} alt={item.name} className="w-16 h-16 object-cover rounded-lg border border-gray-100 group-hover:scale-105 transition-transform" />
+                </a>
                 <div className="flex-1 text-gray-800">
-                  <h4 className="text-sm font-semibold line-clamp-2 leading-snug">{item.name}</h4>
+                  <a href={`#/product/${item.id}`} className="block">
+                    <h4 className="text-sm font-semibold line-clamp-2 leading-snug group-hover:text-rose-600 transition-colors">{item.name}</h4>
+                  </a>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-sm text-gray-500">{toBengaliNumber(item.quantity)} x {toBengaliNumber(item.price)} ৳</span>
                     <span className="text-sm font-bold">{toBengaliNumber((item.quantity * item.price).toFixed(2))} ৳</span>

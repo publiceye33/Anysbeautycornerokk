@@ -11,7 +11,8 @@ import LoadingScreen from '@/src/components/LoadingScreen';
 
 export default function ProductDetail({ id }: { id: string }) {
   const router = useRouter();
-  const { cart, addToCart } = useStore();
+  const { cart, addToCart, updateQuantity } = useStore();
+  const cartItem = cart.find((item) => item.id === id);
   const [product, setProduct] = useState<any>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -402,41 +403,82 @@ export default function ProductDetail({ id }: { id: string }) {
                   <div className="space-y-8 pt-4">
                     <div className="flex items-center gap-8">
                       <span className="text-gray-950 font-black uppercase tracking-wider text-xs md:text-sm">পরিমাণ:</span>
-                      <div className="flex items-center border border-gray-150/60 rounded-full bg-gray-50/70 p-1 shadow-inner max-w-max">
+                      <div className="flex items-center border border-gray-200 rounded-[13px] bg-gray-50 p-1.5 shadow-sm max-w-max">
                         <button 
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                          className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-full text-gray-400 hover:text-rose-500 transition-all shadow-sm active:scale-90"
+                          className="w-10 h-10 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 rounded-[11px] shadow-sm active:scale-90 transition-all"
                         >
-                          <Minus className="w-3.5 h-3.5" />
+                          <Minus className="w-4 h-4" />
                         </button>
-                        <span className="w-10 text-center font-bold text-base text-gray-950 px-1">{toBengaliNumber(quantity)}</span>
+                        <span className="w-12 text-center font-bold text-lg text-gray-950 px-1">{toBengaliNumber(quantity)}</span>
                         <button 
                           onClick={() => setQuantity(quantity + 1)}
-                          className="w-8 h-8 flex items-center justify-center hover:bg-white rounded-full text-gray-400 hover:text-rose-500 transition-all shadow-sm active:scale-95"
+                          className="w-10 h-10 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 rounded-[11px] shadow-sm active:scale-95 transition-all"
                         >
-                          <Plus className="w-3.5 h-3.5" />
+                          <Plus className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row gap-5">
-                      <button 
-                        type="button"
-                        onClick={handleAddToCart}
-                        disabled={!isClickable}
-                        className="flex-1 group relative bg-white text-rose-500 border-2 border-rose-500 py-4 px-8 rounded-[13px] font-black flex items-center justify-center overflow-hidden transition-all hover:bg-rose-500 hover:text-white disabled:opacity-70 disabled:cursor-not-allowed"
-                      >
-                        <ShoppingCart className="w-6 h-6 mr-3 relative z-10 text-rose-500 group-hover:text-white transition-colors" />
-                        <span className="relative z-10">কার্টে যোগ করুন</span>
-                        <div className="absolute inset-0 bg-white group-hover:bg-rose-500 transition-all scale-x-0 group-hover:scale-x-100 origin-left"></div>
-                      </button>
+                      <AnimatePresence mode="wait">
+                        {cartItem ? (
+                          <motion.div 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            key="cartItemQty"
+                            className="flex-1 bg-rose-550/5 border-2 border-rose-500/10 rounded-[13px] font-black flex items-center justify-between p-1.5 h-[58px]"
+                          >
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                if (cartItem.id) {
+                                  updateQuantity(cartItem.id, -1);
+                                }
+                              }} 
+                              className="w-11 h-11 flex items-center justify-center text-rose-600 bg-white border border-rose-500/5 rounded-[10px] shadow-sm hover:scale-105 active:scale-95 transition-all"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="text-base text-rose-950 font-black">{toBengaliNumber(cartItem.quantity)} টি কার্টে আছে</span>
+                            <button 
+                              type="button"
+                              onClick={() => {
+                                if (cartItem.id) {
+                                  updateQuantity(cartItem.id, 1);
+                                }
+                              }} 
+                              className="w-11 h-11 flex items-center justify-center text-rose-600 bg-white border border-rose-500/5 rounded-[10px] shadow-sm hover:scale-105 active:scale-95 transition-all"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </motion.div>
+                        ) : (
+                          <motion.button 
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            key="addToCartBtn"
+                            type="button"
+                            onClick={handleAddToCart}
+                            disabled={!isClickable}
+                            className="flex-1 group relative bg-white text-rose-500 border-2 border-rose-500 py-4 px-8 rounded-[13px] font-black flex items-center justify-center overflow-hidden transition-all hover:bg-rose-500 hover:text-white disabled:opacity-70 disabled:cursor-not-allowed h-[58px]"
+                          >
+                            <ShoppingCart className="w-6 h-6 mr-3 relative z-10 text-rose-500 group-hover:text-white transition-colors" />
+                            <span className="relative z-10">কার্টে যোগ করুন</span>
+                            <div className="absolute inset-0 bg-white group-hover:bg-rose-500 transition-all scale-x-0 group-hover:scale-x-100 origin-left"></div>
+                          </motion.button>
+                        )}
+                      </AnimatePresence>
+
                       <button 
                         type="button"
                         onClick={handleBuyNow}
                         disabled={!isClickable}
-                        className="flex-[1.2] bg-rose-500 text-white py-4 px-8 rounded-[13px] font-black flex items-center justify-center hover:bg-rose-600 transition-all shadow-2xl shadow-rose-500/20 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="flex-[1.2] bg-rose-500 text-white py-4 px-8 rounded-[13px] font-black flex items-center justify-center hover:bg-rose-600 transition-all shadow-2xl shadow-rose-500/20 transform active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed h-[58px]"
                       >
-                        <CreditCard className="w-6 h-6 mr-3 text-white" />
+                        <CreditCard className="w-5 h-5 mr-3 text-white" />
                         অর্ডার করুন
                       </button>
                     </div>
@@ -747,18 +789,38 @@ export default function ProductDetail({ id }: { id: string }) {
                 <div className="px-3 border-r border-white/10 flex flex-col justify-center">
                   <div className="flex flex-col font-sans">
                     <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-0.5 whitespace-nowrap">সবমোট</span>
-                    <span className="text-white text-base font-black italic">{toBengaliNumber((Number(product.price) * quantity).toLocaleString('en-US'))}৳</span>
+                    <span className="text-white text-base font-black italic">{toBengaliNumber((Number(product.price) * (cartItem ? cartItem.quantity : quantity)).toLocaleString('en-US'))}৳</span>
                   </div>
                 </div>
-                <button 
-                  type="button"
-                  onClick={handleAddToCart}
-                  disabled={!isClickable}
-                  className="flex-1 bg-white/5 hover:bg-white/10 text-white h-12 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all border border-white/5 disabled:opacity-50"
-                >
-                  <ShoppingCart className="w-4 h-4 mr-1.5" />
-                  কার্ট
-                </button>
+                {cartItem ? (
+                  <div className="flex-1 bg-white/5 border border-white/10 rounded-[12px] flex items-center justify-between px-1 h-12">
+                    <button 
+                      type="button"
+                      onClick={() => updateQuantity(id, -1)}
+                      className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-[10px] hover:scale-105 active:scale-95 transition-all"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="text-xs text-white font-bold leading-none">{toBengaliNumber(cartItem.quantity)}টি</span>
+                    <button 
+                      type="button"
+                      onClick={() => updateQuantity(id, 1)}
+                      className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-[10px] hover:scale-105 active:scale-95 transition-all"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ) : (
+                  <button 
+                    type="button"
+                    onClick={handleAddToCart}
+                    disabled={!isClickable}
+                    className="flex-1 bg-white/5 hover:bg-white/10 text-white h-12 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all border border-white/5 disabled:opacity-50"
+                  >
+                    <ShoppingCart className="w-4 h-4 mr-1.5" />
+                    কার্ট
+                  </button>
+                )}
                 <button 
                   type="button"
                   onClick={handleBuyNow}
