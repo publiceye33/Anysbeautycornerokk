@@ -419,35 +419,35 @@ function OrderFormContent() {
                     </a>
                     
                     <div className="flex justify-between items-center mt-2 gap-2">
-                      <div className="flex items-center border border-gray-200 rounded-lg bg-gray-50 p-0.5 shadow-sm">
+                      <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50 p-1 shadow-sm">
                         <button 
                           type="button"
                           onClick={() => handleUpdateQuantity(item.id, -1)}
                           disabled={item.quantity <= 1}
-                          className="w-5 h-5 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 disabled:opacity-50 disabled:pointer-events-none rounded shadow-sm scale-95 hover:scale-100 active:scale-90 transition-all"
+                          className="w-7 h-7 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 hover:border-rose-100 disabled:opacity-50 disabled:pointer-events-none rounded-lg shadow-sm scale-95 hover:scale-105 active:scale-90 transition-all"
                         >
-                          <Minus className="w-2.5 h-2.5" />
+                          <Minus className="w-3.5 h-3.5" />
                         </button>
-                        <span className="w-6 text-center font-bold text-xs text-gray-950 px-0.5">{toBengaliNumber(item.quantity)}</span>
+                        <span className="w-8 text-center font-bold text-sm text-gray-950 px-1">{toBengaliNumber(item.quantity)}</span>
                         <button 
                           type="button"
                           onClick={() => handleUpdateQuantity(item.id, 1)}
-                          className="w-5 h-5 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 rounded shadow-sm scale-95 hover:scale-100 active:scale-95 transition-all"
+                          className="w-7 h-7 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 hover:border-rose-100 rounded-lg shadow-sm scale-95 hover:scale-105 active:scale-90 transition-all"
                         >
-                          <Plus className="w-2.5 h-2.5" />
+                          <Plus className="w-3.5 h-3.5" />
                         </button>
                       </div>
                       
-                      <div className="flex items-center gap-1.5">
+                      <div className="flex items-center gap-2">
                         <span className="text-sm font-bold text-gray-900">{toBengaliNumber((item.quantity * item.price).toFixed(0))} ৳</span>
                         
                         <button
                           type="button"
                           onClick={() => handleRemoveItem(item.id)}
-                          className="p-1 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors ml-0.5"
+                          className="p-1.5 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all ml-0.5 scale-95 hover:scale-105 active:scale-95"
                           title="রিমুভ করুন"
                         >
-                          <Trash2 className="w-3.5 h-3.5" />
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </div>
