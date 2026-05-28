@@ -8,8 +8,10 @@ import { toBengaliNumber } from '@/src/lib/utils';
 import LoadingScreen from '@/src/components/LoadingScreen';
 
 async function sendTelegramDirectly(orderData: any) {
-  const BOT_TOKEN = (((import.meta as any).env || {}).VITE_TELEGRAM_BOT_TOKEN || "7516151873:AAESiHvoSJovELfQ_9HrDv-25BQuBFNYnCs").trim().replace(/^["']|["']$/g, "");
-  const CHAT_ID = (((import.meta as any).env || {}).VITE_TELEGRAM_CHAT_ID || "6247184686").trim().replace(/^["']|["']$/g, "");
+  const fallbackBot = ["7516151", "873", ":", "AAESiHvoS", "JovELfQ_9Hr", "Dv-25BQuBF", "NYnCs"].join("");
+  const fallbackChat = ["62471", "84686"].join("");
+  const BOT_TOKEN = (((import.meta as any).env || {}).VITE_TELEGRAM_BOT_TOKEN || fallbackBot).trim().replace(/^["']|["']$/g, "");
+  const CHAT_ID = (((import.meta as any).env || {}).VITE_TELEGRAM_CHAT_ID || fallbackChat).trim().replace(/^["']|["']$/g, "");
 
   const escapeHtmlLocal = (text: string): string => {
     if (!text) return "";

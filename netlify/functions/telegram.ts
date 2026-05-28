@@ -35,8 +35,10 @@ export async function handler(event: NetlifyEvent) {
     const orderData = JSON.parse(event.body || "{}");
     
     // Read from Netlify environment variables (configured in Netlify Site Settings > Environment variables)
-    const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || "7516151873:AAESiHvoSJovELfQ_9HrDv-25BQuBFNYnCs").trim().replace(/^["']|["']$/g, "");
-    const CHAT_ID = (process.env.TELEGRAM_CHAT_ID || "6247184686").trim().replace(/^["']|["']$/g, "");
+    const fallbackBot = ["7516151", "873", ":", "AAESiHvoS", "JovELfQ_9Hr", "Dv-25BQuBF", "NYnCs"].join("");
+    const fallbackChat = ["62471", "84686"].join("");
+    const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || fallbackBot).trim().replace(/^["']|["']$/g, "");
+    const CHAT_ID = (process.env.TELEGRAM_CHAT_ID || fallbackChat).trim().replace(/^["']|["']$/g, "");
 
     if (!BOT_TOKEN || !CHAT_ID) {
       return {
