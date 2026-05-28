@@ -1,4 +1,4 @@
-import React, { useState, Suspense, useMemo } from 'react';
+import React, { useState, Suspense, useMemo, useEffect } from 'react';
 import { useStore } from '@/src/lib/store';
 import { useRouter, useSearchParams } from '@/src/lib/navigation';
 import { database } from '@/src/lib/firebase';
@@ -6,6 +6,7 @@ import { ref, set, runTransaction } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import { toBengaliNumber } from '@/src/lib/utils';
 import LoadingScreen from '@/src/components/LoadingScreen';
+import { Plus, Minus, Trash2 } from 'lucide-react';
 
 async function sendTelegramDirectly(orderData: any) {
   const fallbackBot = ["7516151", "873", ":", "AAESiHvoS", "JovELfQ_9Hr", "Dv-25BQuBF", "NYnCs"].join("");
@@ -126,7 +127,7 @@ async function sendTelegramDirectly(orderData: any) {
 }
 
 function OrderFormContent() {
-  const { cart, clearCart, deliveryLocation, setDeliveryLocation } = useStore();
+  const { cart, clearCart, updateQuantity, removeFromCart, deliveryLocation, setDeliveryLocation } = useStore();
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -144,17 +145,49 @@ function OrderFormContent() {
     transactionId: '',
   });
 
-  const itemsToOrder = useMemo(() => {
+  const [localItems, setLocalItems] = useState<any[]>(() => {
     const urlCartData = searchParams.get('cart');
     if (urlCartData) {
       try {
         return JSON.parse(decodeURIComponent(urlCartData));
       } catch (e) {
-        return cart;
+        // Fallback to cart
       }
     }
     return cart;
-  }, [searchParams, cart]);
+  });
+
+  const buyNowCartParam = searchParams.get('cart');
+
+  useEffect(() => {
+    if (!buyNowCartParam) {
+      setLocalItems(cart);
+    }
+  }, [cart, buyNowCartParam]);
+
+  const handleUpdateQuantity = (itemId: string, amount: number) => {
+    setLocalItems(prev => prev.map(item => {
+      if (item.id === itemId) {
+        const newQty = item.quantity + amount;
+        return { ...item, quantity: Math.max(1, newQty) };
+      }
+      return item;
+    }));
+
+    const isBuyNow = !!searchParams.get('cart');
+    if (!isBuyNow) {
+      updateQuantity(itemId, amount);
+    }
+  };
+
+  const handleRemoveItem = (itemId: string) => {
+    setLocalItems(prev => prev.filter(item => item.id !== itemId));
+
+    const isBuyNow = !!searchParams.get('cart');
+    if (!isBuyNow) {
+      removeFromCart(itemId);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -168,12 +201,12 @@ function OrderFormContent() {
 
   const isOutsideDhaka = formData.deliveryLocation === 'outsideDhaka';
   const deliveryFee = isOutsideDhaka ? 160 : 70;
-  const subTotal = itemsToOrder.reduce((sum: number, item: any) => sum + (Number(item.price) * item.quantity), 0);
+  const subTotal = localItems.reduce((sum: number, item: any) => sum + (Number(item.price) * item.quantity), 0);
   const totalAmount = subTotal + deliveryFee;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (itemsToOrder.length === 0) {
+    if (localItems.length === 0) {
       alert('আপনার কার্ট খালি!');
       return;
     }
@@ -211,7 +244,7 @@ function OrderFormContent() {
           deliveryFee,
           subTotal: subTotal.toFixed(2),
           totalAmount: totalAmount.toFixed(2),
-          cartItems: itemsToOrder,
+          cartItems: localItems,
           orderDate: new Date().toISOString(),
           status: 'processing',
           userId,
@@ -367,22 +400,61 @@ function OrderFormContent() {
           <h2 className="text-xl font-bold mb-6 text-gray-800 border-b pb-4">অর্ডারের সারাংশ</h2>
           
           <div className="space-y-4 mb-6 max-h-60 overflow-y-auto no-scrollbar pr-2">
-            {itemsToOrder.map((item: any, idx: number) => (
-              <div key={idx} className="flex gap-4 border-b border-gray-50 pb-4 group">
-                <a href={`#/product/${item.id}`} className="block w-16 h-16 flex-shrink-0">
-                  <img src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/60'} alt={item.name} className="w-16 h-16 object-cover rounded-lg border border-gray-100 group-hover:scale-105 transition-transform" />
+            {localItems.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500 font-medium mb-3 text-sm">আপনার কার্ট খালি!</p>
+                <a href="#/" className="inline-block bg-rose-50 text-rose-600 font-bold px-4 py-2 rounded-lg text-xs hover:bg-rose-100 transition-all">
+                  শপ-এ ফিরে যান
                 </a>
-                <div className="flex-1 text-gray-800">
-                  <a href={`#/product/${item.id}`} className="block">
-                    <h4 className="text-sm font-semibold line-clamp-2 leading-snug group-hover:text-rose-600 transition-colors">{item.name}</h4>
+              </div>
+            ) : (
+              localItems.map((item: any, idx: number) => (
+                <div key={idx} className="flex gap-4 border-b border-gray-50 pb-4 group">
+                  <a href={`#/product/${item.id}`} className="block w-16 h-16 flex-shrink-0">
+                    <img src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/60'} alt={item.name} className="w-16 h-16 object-cover rounded-lg border border-gray-100 group-hover:scale-105 transition-transform" />
                   </a>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-sm text-gray-500">{toBengaliNumber(item.quantity)} x {toBengaliNumber(item.price)} ৳</span>
-                    <span className="text-sm font-bold">{toBengaliNumber((item.quantity * item.price).toFixed(2))} ৳</span>
+                  <div className="flex-1 text-gray-800">
+                    <a href={`#/product/${item.id}`} className="block">
+                      <h4 className="text-sm font-semibold line-clamp-1 leading-snug group-hover:text-rose-600 transition-colors">{item.name}</h4>
+                    </a>
+                    
+                    <div className="flex justify-between items-center mt-2 gap-2">
+                      <div className="flex items-center border border-gray-200 rounded-lg bg-gray-50 p-0.5 shadow-sm">
+                        <button 
+                          type="button"
+                          onClick={() => handleUpdateQuantity(item.id, -1)}
+                          disabled={item.quantity <= 1}
+                          className="w-5 h-5 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 disabled:opacity-50 disabled:pointer-events-none rounded shadow-sm scale-95 hover:scale-100 active:scale-90 transition-all"
+                        >
+                          <Minus className="w-2.5 h-2.5" />
+                        </button>
+                        <span className="w-6 text-center font-bold text-xs text-gray-950 px-0.5">{toBengaliNumber(item.quantity)}</span>
+                        <button 
+                          type="button"
+                          onClick={() => handleUpdateQuantity(item.id, 1)}
+                          className="w-5 h-5 flex items-center justify-center bg-white border border-gray-100 text-gray-500 hover:text-rose-500 rounded shadow-sm scale-95 hover:scale-100 active:scale-95 transition-all"
+                        >
+                          <Plus className="w-2.5 h-2.5" />
+                        </button>
+                      </div>
+                      
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-sm font-bold text-gray-900">{toBengaliNumber((item.quantity * item.price).toFixed(0))} ৳</span>
+                        
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveItem(item.id)}
+                          className="p-1 text-gray-400 hover:text-rose-500 hover:bg-rose-50 rounded-md transition-colors ml-0.5"
+                          title="রিমুভ করুন"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
           </div>
 
           <div className="space-y-3 text-gray-600 mb-6 bg-gray-50 p-4 rounded-xl">
@@ -402,7 +474,7 @@ function OrderFormContent() {
 
           <button 
             type="submit" 
-            disabled={loading || itemsToOrder.length === 0}
+            disabled={loading || localItems.length === 0}
             className="w-full bg-rose-500 hover:bg-rose-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-[13px] shadow-md transition-all flex justify-center items-center"
           >
             {loading ? (
