@@ -52,7 +52,6 @@ export default function ProfileView({ initialTab = 'info' }: ProfileProps) {
   // Orders and notifications lists state
   const [orders, setOrders] = useState<any[]>([]);
   const [notifications, setNotifications] = useState<any[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
   
   // Status state for alerts/toasts
   const [successMsg, setSuccessMsg] = useState('');
@@ -539,7 +538,7 @@ export default function ProfileView({ initialTab = 'info' }: ProfileProps) {
                       return (
                         <div 
                           key={order.id} 
-                          onClick={() => setSelectedOrder(order)}
+                          onClick={() => router.push(`/order-track?orderId=${order.orderId || order.id}`)}
                           className="bg-white rounded-2xl p-4 border border-gray-100 hover:border-rose-200 shadow-2xs hover:shadow-md transition-all duration-300 cursor-pointer flex flex-col justify-between group relative overflow-hidden"
                         >
                           {/* Background Accent Decor */}
@@ -596,7 +595,7 @@ export default function ProfileView({ initialTab = 'info' }: ProfileProps) {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setSelectedOrder(order);
+                                router.push(`/order-track?orderId=${order.orderId || order.id}`);
                               }}
                               className="flex items-center gap-1 bg-rose-500 hover:bg-rose-600 text-white font-extrabold text-[10px] px-2.5 py-1.5 rounded-lg active:scale-95 transition"
                             >
@@ -647,13 +646,7 @@ export default function ProfileView({ initialTab = 'info' }: ProfileProps) {
                         key={notif.id}
                         onClick={() => {
                           if (!notif.read) markAsRead(notif.id);
-                          // Fetch order object details to show tracking modal
-                          const orderRef = ref(database, `orders/${notif.orderId}`);
-                          get(orderRef).then(snap => {
-                            if (snap.exists()) {
-                              setSelectedOrder({ id: notif.orderId, ...snap.val() });
-                            }
-                          });
+                          router.push(`/order-track?orderId=${notif.orderId}`);
                         }}
                         className={`p-4 rounded-2xl border transition-all cursor-pointer flex gap-3 relative overflow-hidden group hover:shadow-xs ${notif.read ? 'bg-gray-50 border-gray-250/30' : 'bg-rose-500/5 border-rose-200/70'}`}
                       >
@@ -687,109 +680,6 @@ export default function ProfileView({ initialTab = 'info' }: ProfileProps) {
                 </div>
               </div>
             )}
-          </div>
-        </div>
-      )}
-
-      {/* SECURE ORDER DETAILS MODAL (Duplicate from OrderTrack but matches beautifully) */}
-      {selectedOrder && (
-        <div className="fixed inset-0 z-[110] bg-black/65 flex items-center justify-center p-4 backdrop-blur-xs animate-fade-in" onClick={() => setSelectedOrder(null)}>
-          <div 
-            className="bg-white rounded-3xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl relative" 
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="sticky top-0 bg-white p-4 border-b flex justify-between items-center z-10 rounded-t-3xl">
-              <div>
-                <h2 className="text-sm font-extrabold text-gray-800">অর্ডার ট্র্যাকিং ও বিবরণ</h2>
-                <p className="text-[9px] text-gray-405 font-bold font-sans">ORDER ID: #{selectedOrder.orderId || selectedOrder.id}</p>
-              </div>
-              <button onClick={() => setSelectedOrder(null)} className="p-2 hover:bg-gray-150/70 rounded-full transition">
-                <X className="w-4 h-4 text-gray-500" />
-              </button>
-            </div>
-            
-            <div className="p-5">
-              {/* Tracker Step Bar */}
-              <div className="flex justify-between items-center mb-8 relative">
-                {(() => {
-                  const statuses = ['processing', 'confirmed', 'packaging', 'shipped', 'delivered'];
-                  const currentIndex = statuses.indexOf(selectedOrder.status || 'processing');
-                  return statuses.map((status, index) => {
-                    const isActive = index <= currentIndex;
-                    const isCompleted = index < currentIndex;
-                    return (
-                      <div key={status} className="flex flex-col items-center relative z-10 flex-1">
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center font-extrabold text-[9px] mb-1 transition-colors ${isActive ? 'bg-emerald-500 text-white' : 'bg-gray-100 text-gray-400 border border-gray-200'}`}>
-                          {isCompleted ? <Check className="w-2.5 h-2.5" /> : index + 1}
-                        </div>
-                        <span className={`text-[8px] font-bold text-center ${isActive ? 'text-emerald-600' : 'text-gray-400'}`}>
-                          {getStatusText(status)}
-                        </span>
-                      </div>
-                    );
-                  })
-                })()}
-                {/* Tracker background bar */}
-                <div className="absolute top-3 left-[10%] right-[10%] h-[2px] bg-gray-150 -z-0">
-                  <div 
-                    className="h-full bg-emerald-500 transition-all duration-500" 
-                    style={{ 
-                      width: `${(['processing', 'confirmed', 'packaging', 'shipped', 'delivered'].indexOf(selectedOrder.status || 'processing') / 4) * 100}%` 
-                    }}
-                  />
-                </div>
-              </div>
-
-              {/* Order customer shipment fields details */}
-              <div className="bg-gray-50 border border-gray-150/70 rounded-2xl p-4 mb-5 space-y-2 text-xs text-gray-650">
-                <p><strong className="text-gray-900">ক্রেতার নাম:</strong> {selectedOrder.customerName}</p>
-                <p><strong className="text-gray-900">তারিখ:</strong> {new Date(selectedOrder.orderDate).toLocaleString('bn-BD', { dateStyle: 'medium', timeStyle: 'short' })}</p>
-                <p><strong className="text-gray-900">মোবাইল নম্বর:</strong> {selectedOrder.phoneNumber}</p>
-                <p><strong className="text-gray-900">ঠিকানা:</strong> {selectedOrder.address}</p>
-                <p><strong className="text-gray-900">ডেলিভারি এলাকা:</strong> {selectedOrder.deliveryLocation}</p>
-                {selectedOrder.outsideDhakaLocation && selectedOrder.outsideDhakaLocation !== 'N/A' && (
-                  <p><strong className="text-gray-900">জেলা ও থানা:</strong> {selectedOrder.outsideDhakaLocation}</p>
-                )}
-                {selectedOrder.deliveryNote && selectedOrder.deliveryNote !== 'N/A' && (
-                  <p><strong className="text-gray-900">ডেলিভারি নোট:</strong> {selectedOrder.deliveryNote}</p>
-                )}
-              </div>
-
-              {/* Order Items List */}
-              <h3 className="font-extrabold text-xs text-gray-800 mb-3 border-b pb-1.5 uppercase tracking-wide flex items-center gap-1">
-                <Package className="w-3.5 h-3.5 text-rose-500" />
-                পণ্য তালিকা
-              </h3>
-              <div className="space-y-2.5 mb-5 max-h-[170px] overflow-y-auto pr-1">
-                {(selectedOrder.cartItems || []).map((item: any, idx: number) => (
-                  <div key={idx} className="flex gap-3 p-2 bg-gray-50/70 rounded-xl border border-gray-150/60 items-center">
-                    <img 
-                      src={item.image ? item.image.split(',')[0].trim() : 'https://via.placeholder.com/45'} 
-                      alt={item.name} 
-                      className="w-10 h-10 object-cover rounded-lg border border-gray-200 shrink-0" 
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-black text-xs text-gray-800 truncate">{item.name}</p>
-                      <p className="text-[10px] text-gray-400 font-bold mt-0.5">
-                        {toBengaliNumber(item.quantity || 1)} x {toBengaliNumber(item.price)} ৳
-                      </p>
-                    </div>
-                    <div className="font-black text-xs text-gray-900 shrink-0">
-                      {toBengaliNumber((item.quantity * item.price).toFixed(0))} ৳
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Secure Totals Summary */}
-              <div className="bg-rose-500/5 border border-rose-500/10 p-4 rounded-2xl text-xs space-y-1 text-right">
-                <p className="text-gray-650">ডেলিভারি ফি: <span className="font-bold text-gray-850 ml-4">{toBengaliNumber(selectedOrder.deliveryFee || 0)} ৳</span></p>
-                <p className="text-sm font-black text-rose-955 mt-2 border-t border-rose-500/20 pt-2 flex justify-between items-center">
-                  <span>সর্বমোট পরিশোধ:</span>
-                  <span className="text-base">{toBengaliNumber(selectedOrder.totalAmount || 0)} ৳</span>
-                </p>
-              </div>
-            </div>
           </div>
         </div>
       )}

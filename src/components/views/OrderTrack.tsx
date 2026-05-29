@@ -1,6 +1,6 @@
 import { useEffect, useState, Suspense } from 'react';
 import { database, auth, googleProvider } from '@/src/lib/firebase';
-import { ref, get } from 'firebase/database';
+import { ref, get, update, push } from 'firebase/database';
 import { useStore } from '@/src/lib/store';
 import { X, Check, Package, Eye } from 'lucide-react';
 import { signInWithPopup } from 'firebase/auth';
@@ -17,6 +17,61 @@ function OrderTrackContent() {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+
+  const handleUpdateStatusSimulate = async (newStatus: string) => {
+    if (!selectedOrder) return;
+    setUpdatingStatus(newStatus);
+    const orderId = selectedOrder.id || selectedOrder.orderId;
+    
+    try {
+      // 1. Update order status in db
+      const orderRef = ref(database, `orders/${orderId}`);
+      await update(orderRef, { status: newStatus });
+
+      // 2. Refresh selected order state
+      const updatedSnap = await get(orderRef);
+      let targetUserId = selectedOrder.userId;
+      
+      if (updatedSnap.exists()) {
+        const val = updatedSnap.val();
+        targetUserId = val.userId || targetUserId;
+        setSelectedOrder({ id: orderId, ...val });
+      }
+
+      // 3. Write real-time notification node in database under owner's user node
+      const currentUID = user?.uid || targetUserId;
+      if (currentUID) {
+        const getStatusLabel = (s: string) => {
+          const m: Record<string, string> = {
+            processing: 'প্রসেসিং',
+            confirmed: 'কনফার্মড',
+            packaging: 'প্যাকেজিং',
+            shipped: 'শিপড',
+            delivered: 'ডেলিভার্ড',
+          };
+          return m[s] || s;
+        };
+
+        const notificationsRef = ref(database, `users/${currentUID}/notifications`);
+        await push(notificationsRef, {
+          orderId: orderId,
+          oldStatus: selectedOrder.status || 'processing',
+          newStatus: newStatus,
+          message: `আপনার অর্ডার #${orderId.substring(0, 6)} এর স্ট্যাটাস '${getStatusLabel(newStatus)}' করা হয়েছে।`,
+          timestamp: Date.now(),
+          read: false,
+        });
+      }
+
+      // 4. Reload full order list
+      await fetchOrders();
+    } catch (err) {
+      console.error("Simulation error status change:", err);
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
 
   const handleCloseModal = () => {
     if (urlOrderId) {
@@ -352,6 +407,36 @@ function OrderTrackContent() {
               <div className="bg-rose-500/5 border border-rose-500/10 p-3 rounded-xl text-xs flex flex-col gap-1 text-right">
                 <p className="text-gray-600">ডেলিভারি ফি: <span className="font-bold text-gray-800 ml-4">{toBengaliNumber(selectedOrder.deliveryFee || 0)} ৳</span></p>
                 <p className="text-sm font-black text-rose-955 mt-1 border-t border-rose-500/20 pt-1.5">সর্বমোট মূল্য: <span className="ml-4">{toBengaliNumber(selectedOrder.totalAmount || 0)} ৳</span></p>
+              </div>
+
+              {/* Secure Order Status Simulator */}
+              <div className="mt-5 p-4 bg-emerald-500/5 rounded-2xl border border-emerald-500/10">
+                <div className="flex items-center gap-1.5 mb-2.5">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                  <p className="text-[10px] font-extrabold text-emerald-800 uppercase tracking-widest">স্ট্যাটাস পরিবর্তন এবং ডেমো নোটিফিকেশন জেনারেটর</p>
+                </div>
+                <p className="text-[10px] text-gray-500 font-medium mb-3 leading-relaxed">
+                  নিচের বাটনগুলোর যেকোনো একটি ক্লিক করে অর্ডারের বর্তমান অবস্থা পরিবর্তন করতে পারেন। পরিবর্তন করার সাথে সাথে ক্রেতার প্রোফাইলে একটি রিয়েল-টাইম নোটিফিকেশন যুক্ত হবে।
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {['processing', 'confirmed', 'packaging', 'shipped', 'delivered'].map((statusOption) => {
+                    const isCurrent = (selectedOrder.status || 'processing') === statusOption;
+                    return (
+                      <button
+                        key={statusOption}
+                        disabled={updatingStatus !== null}
+                        onClick={() => handleUpdateStatusSimulate(statusOption)}
+                        className={`text-[9.5px] font-black px-3 py-1.5 rounded-xl border transition-all cursor-pointer active:scale-95 disabled:opacity-50 ${
+                          isCurrent
+                            ? 'bg-emerald-500 text-white border-emerald-500 shadow-xs'
+                            : 'bg-white hover:bg-emerald-500/5 text-gray-700 border-gray-200'
+                        }`}
+                      >
+                        {updatingStatus === statusOption ? '...' : getStatusText(statusOption)}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
