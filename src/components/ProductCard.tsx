@@ -132,8 +132,8 @@ export default function ProductCard({ product }: { product: Product }) {
                   onClick={handleAddToCart} 
                   className={`w-full h-9 rounded-[13px] font-bold flex items-center justify-center transition-all shadow-sm ${isOutOfStock ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-rose-950 border border-rose-500/30 hover:bg-rose-500 hover:text-white hover:border-rose-500'}`}
                 >
-                  <ShoppingCart className="w-3 h-3 mr-1.5" />
-                  <span className="text-[9px] uppercase tracking-widest">কার্টে যোগ করুন</span>
+                  <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
+                  <span className="text-[12px] uppercase tracking-wider">কার্টে যোগ করুন</span>
                 </motion.button>
               )}
             </AnimatePresence>
@@ -141,7 +141,7 @@ export default function ProductCard({ product }: { product: Product }) {
             <button 
               disabled={isOutOfStock}
               onClick={handleBuyNow} 
-              className={`w-full h-9 rounded-[13px] font-bold text-[10px] uppercase tracking-widest transition-all shadow-md ${isOutOfStock ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'bg-rose-500 text-white hover:bg-rose-600 active:bg-rose-700 active:scale-[0.98] shadow-rose-500/10'}`}
+              className={`w-full h-9 rounded-[13px] font-bold text-[13px] uppercase tracking-wider transition-all shadow-md ${isOutOfStock ? 'bg-gray-50 text-gray-300 cursor-not-allowed' : 'bg-rose-500 text-white hover:bg-rose-600 active:bg-rose-700 active:scale-[0.98] shadow-rose-500/10'}`}
             >
               কিনুন
             </button>

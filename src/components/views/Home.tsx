@@ -9,7 +9,7 @@ import 'swiper/css/pagination';
 import 'swiper/css/effect-fade';
 import { useSearchParams, useRouter } from '@/src/lib/navigation';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronRight, ArrowRight, Sparkles, ShoppingBag, CreditCard, ShoppingCart } from 'lucide-react';
+import { ChevronRight, ArrowRight, Sparkles, ShoppingBag, CreditCard, ShoppingCart, Phone } from 'lucide-react';
 import { useStore } from '@/src/lib/store';
 import { toBengaliNumber } from '@/src/lib/utils';
 import LoadingScreen from '@/src/components/LoadingScreen';
@@ -37,6 +37,9 @@ function HomeContent() {
         setProducts(prods);
       }
       setLoading(false);
+    }, (error) => {
+      console.error("Firebase read error productsRef:", error);
+      setLoading(false);
     });
 
     const unsubEvents = onValue(eventsRef, (snapshot) => {
@@ -49,6 +52,8 @@ function HomeContent() {
           .slice(0, 3);
         setEvents(evts);
       }
+    }, (error) => {
+      console.error("Firebase read error eventsRef:", error);
     });
 
     return () => {
@@ -252,32 +257,44 @@ function HomeContent() {
             exit={{ y: 100, opacity: 0 }}
             className="fixed bottom-6 left-4 right-4 z-40 lg:hidden"
           >
-            <div className="bg-black/95 backdrop-blur-2xl rounded-[15px] p-1.5 shadow-xl flex items-center gap-2 border border-white/10 overflow-hidden">
-              <div className="px-3 border-r border-white/10 flex flex-col justify-center">
+            <div className="bg-rose-500/95 backdrop-blur-2xl rounded-[18px] p-2 shadow-xl flex items-center gap-2 border border-white/20 overflow-hidden">
+              <div className="px-3 border-r border-white/20 flex flex-col justify-center">
                 <div className="flex flex-col font-sans">
-                  <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-0.5 whitespace-nowrap">সর্বমোট</span>
+                  <span className="text-[9px] font-bold text-white/70 uppercase tracking-widest mb-0.5 whitespace-nowrap">সর্বমোট</span>
                   <span className="text-white text-base font-black italic">{toBengaliNumber(cartTotal.toLocaleString('en-US'))}৳</span>
                 </div>
               </div>
+
+              {/* Call Support Quick Access */}
+              <a 
+                href="tel:+8801931866636"
+                className="w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-[12px] flex items-center justify-center border border-white/10 transition-all shrink-0 active:scale-95"
+                title="কল সাপোর্ট"
+              >
+                <Phone className="w-4 h-4 text-white" />
+              </a>
               
               <button 
                 type="button"
                 onClick={() => setIsCartOpen(true)}
-                className="flex-1 bg-white/5 hover:bg-white/10 text-white h-12 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all border border-white/5"
+                className="flex-1 bg-white/10 hover:bg-white/20 text-white h-11 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all border border-white/10 gap-1.5"
               >
-                <ShoppingCart className="w-4 h-4 mr-1.5" />
-                কার্ট
+                <div className="relative">
+                  <ShoppingCart className="w-4 h-4 text-white" />
+                  <span className="absolute -top-1.5 -right-1.5 bg-white text-rose-500 text-[7.5px] rounded-full h-3.5 w-3.5 flex items-center justify-center font-bold">
+                    {cartItems}
+                  </span>
+                </div>
+                <span>কার্ট</span>
               </button>
               
               <button 
                 type="button"
                 onClick={() => router.push('/order-form')}
-                className="flex-[1.5] bg-rose-500 text-white h-12 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center shadow-lg shadow-rose-500/20 active:scale-95 transition-all hover:bg-rose-600 border border-rose-400/40 relative overflow-hidden group"
+                className="flex-[1.4] bg-white text-rose-700 h-11 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center shadow-lg active:scale-95 transition-all hover:bg-rose-50 border border-white relative overflow-hidden group gap-1"
               >
-                <span className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
-                <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                <CreditCard className="w-4 h-4 mr-1.5 text-white/95 group-hover:scale-110 transition-transform" />
-                কিনুন
+                <CreditCard className="w-4 h-4 text-rose-600 group-hover:scale-110 transition-transform" />
+                <span>কিনুন</span>
               </button>
             </div>
           </motion.div>

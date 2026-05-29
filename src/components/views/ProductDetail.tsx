@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { database } from '@/src/lib/firebase';
 import { ref, get, onValue, set, push, query, orderByChild, equalTo } from 'firebase/database';
 import { useStore } from '@/src/lib/store';
-import { ShoppingCart, CreditCard, Minus, Plus, Share2, ShieldCheck, Truck, RefreshCcw, Star, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ShoppingCart, CreditCard, Minus, Plus, Share2, ShieldCheck, Truck, RefreshCcw, Star, ChevronLeft, ChevronRight, Phone } from 'lucide-react';
 import { useRouter } from '@/src/lib/navigation';
 import ProductCard from '@/src/components/ProductCard';
 import { motion, AnimatePresence } from 'motion/react';
@@ -62,6 +62,8 @@ export default function ProductDetail({ id }: { id: string }) {
         const prods = Object.keys(data).map(key => ({ id: key, ...data[key] }));
         setProducts(prods);
       }
+    }, (error) => {
+      console.error("Firebase read error productsRef in ProductDetail:", error);
     });
 
     // Fetch reviews
@@ -78,6 +80,8 @@ export default function ProductDetail({ id }: { id: string }) {
       } else {
         setReviews([]);
       }
+    }, (error) => {
+      console.error("Firebase read error reviewsRef in ProductDetail:", error);
     });
 
     return () => {
@@ -402,7 +406,7 @@ export default function ProductDetail({ id }: { id: string }) {
                 {!isOutOfStock ? (
                   <div className="space-y-8 pt-4">
                     <div className="flex items-center gap-8">
-                      <span className="text-gray-950 font-black uppercase tracking-wider text-xs md:text-sm">পরিমাণ:</span>
+                      <span className="text-gray-950 font-black uppercase tracking-wider text-base md:text-lg">পরিমাণ:</span>
                       <div className="flex items-center border border-gray-200 rounded-[13px] bg-gray-50 p-1.5 shadow-sm max-w-max">
                         <button 
                           onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -785,29 +789,39 @@ export default function ProductDetail({ id }: { id: string }) {
               animate={{ y: 0 }}
               className="lg:hidden fixed bottom-6 left-4 right-4 z-40"
             >
-              <div className="bg-black/95 backdrop-blur-2xl rounded-[15px] p-1.5 shadow-xl flex items-center gap-2 border border-white/10 overflow-hidden">
-                <div className="px-3 border-r border-white/10 flex flex-col justify-center">
+              <div className="bg-rose-500/95 backdrop-blur-2xl rounded-[18px] p-2 shadow-xl flex items-center gap-2 border border-white/20 overflow-hidden">
+                <div className="px-3 border-r border-white/20 flex flex-col justify-center">
                   <div className="flex flex-col font-sans">
-                    <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-0.5 whitespace-nowrap">সবমোট</span>
+                    <span className="text-[9px] font-bold text-white/70 uppercase tracking-widest mb-0.5 whitespace-nowrap">সবমোট</span>
                     <span className="text-white text-base font-black italic">{toBengaliNumber((Number(product.price) * (cartItem ? cartItem.quantity : quantity)).toLocaleString('en-US'))}৳</span>
                   </div>
                 </div>
+
+                {/* Call Support Quick Access */}
+                <a 
+                  href="tel:+8801931866636"
+                  className="w-11 h-11 bg-white/10 hover:bg-white/20 text-white rounded-[12px] flex items-center justify-center border border-white/10 transition-all shrink-0 active:scale-95"
+                  title="কল সাপোর্ট"
+                >
+                  <Phone className="w-4 h-4 text-white" />
+                </a>
+
                 {cartItem ? (
-                  <div className="flex-1 bg-white/5 border border-white/10 rounded-[12px] flex items-center justify-between px-1 h-12">
+                  <div className="flex-1 bg-white/10 border border-white/10 rounded-[12px] flex items-center justify-between px-1 h-11">
                     <button 
                       type="button"
                       onClick={() => updateQuantity(id, -1)}
-                      className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-[10px] hover:scale-105 active:scale-95 transition-all"
+                      className="w-7 h-7 flex items-center justify-center text-white bg-white/10 rounded-[10px] hover:scale-105 active:scale-95 transition-all"
                     >
-                      <Minus className="w-3.5 h-3.5" />
+                      <Minus className="w-3 h-3" />
                     </button>
-                    <span className="text-xs text-white font-bold leading-none">{toBengaliNumber(cartItem.quantity)}টি</span>
+                    <span className="text-[11px] text-white font-bold leading-none">{toBengaliNumber(cartItem.quantity)}টি</span>
                     <button 
                       type="button"
                       onClick={() => updateQuantity(id, 1)}
-                      className="w-8 h-8 flex items-center justify-center text-white bg-white/10 rounded-[10px] hover:scale-105 active:scale-95 transition-all"
+                      className="w-7 h-7 flex items-center justify-center text-white bg-white/10 rounded-[10px] hover:scale-105 active:scale-95 transition-all"
                     >
-                      <Plus className="w-3.5 h-3.5" />
+                      <Plus className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
@@ -815,22 +829,20 @@ export default function ProductDetail({ id }: { id: string }) {
                     type="button"
                     onClick={handleAddToCart}
                     disabled={!isClickable}
-                    className="flex-1 bg-white/5 hover:bg-white/10 text-white h-12 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all border border-white/5 disabled:opacity-50"
+                    className="flex-1 bg-white/10 hover:bg-white/20 text-white h-11 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center transition-all border border-white/10 disabled:opacity-50 gap-1"
                   >
-                    <ShoppingCart className="w-4 h-4 mr-1.5" />
-                    কার্ট
+                    <ShoppingCart className="w-3.5 h-3.5 text-white" />
+                    <span>কার্ট</span>
                   </button>
                 )}
                 <button 
                   type="button"
                   onClick={handleBuyNow}
                   disabled={!isClickable}
-                  className="flex-[1.5] bg-rose-500 text-white h-12 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center shadow-lg shadow-rose-500/20 active:scale-95 transition-all hover:bg-rose-600 hover:text-white border border-rose-400/40 relative overflow-hidden group disabled:opacity-50"
+                  className="flex-[1.4] bg-white text-rose-700 h-11 rounded-[12px] font-black text-xs uppercase tracking-widest flex items-center justify-center shadow-lg active:scale-95 transition-all hover:bg-rose-50 border border-white relative overflow-hidden group disabled:opacity-50 gap-1"
                 >
-                  <span className="absolute inset-x-0 top-0 h-[1.5px] bg-gradient-to-r from-transparent via-white/20 to-transparent"></span>
-                  <span className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity"></span>
-                  <CreditCard className="w-4 h-4 mr-1.5 text-white/95 group-hover:scale-110 transition-transform" />
-                  কিনুন
+                  <CreditCard className="w-3.5 h-3.5 text-rose-600 group-hover:scale-110 transition-transform" />
+                  <span>کینুন</span>
                 </button>
               </div>
             </motion.div>

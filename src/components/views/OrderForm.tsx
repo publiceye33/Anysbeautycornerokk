@@ -8,124 +8,6 @@ import { toBengaliNumber } from '@/src/lib/utils';
 import LoadingScreen from '@/src/components/LoadingScreen';
 import { Plus, Minus, Trash2 } from 'lucide-react';
 
-async function sendTelegramDirectly(orderData: any) {
-  const fallbackBot = ["7516151", "873", ":", "AAESiHvoS", "JovELfQ_9Hr", "Dv-25BQuBF", "NYnCs"].join("");
-  const fallbackChat = ["62471", "84686"].join("");
-  const BOT_TOKEN = (((import.meta as any).env || {}).VITE_TELEGRAM_BOT_TOKEN || fallbackBot).trim().replace(/^["']|["']$/g, "");
-  const CHAT_ID = (((import.meta as any).env || {}).VITE_TELEGRAM_CHAT_ID || fallbackChat).trim().replace(/^["']|["']$/g, "");
-
-  const escapeHtmlLocal = (text: string): string => {
-    if (!text) return "";
-    return String(text)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  };
-
-  const {
-    customerName = 'N/A',
-    phoneNumber = 'N/A',
-    address = 'N/A',
-    orderId = 'N/A',
-    deliveryLocation = 'N/A',
-    deliveryPaymentMethod = 'cod',
-    paymentMethod = 'cod',
-    paymentNumber = 'N/A',
-    transactionId = 'N/A',
-    outsideDhakaLocation = 'N/A',
-    deliveryNote = 'N/A',
-    subTotal = '0',
-    deliveryFee = '0',
-    totalAmount = '0',
-    cartItems = [],
-    hostOrigin = ""
-  } = orderData;
-
-  const safeCustomerName = escapeHtmlLocal(customerName);
-  const safePhoneNumber = escapeHtmlLocal(phoneNumber);
-  const safeExpressAddress = escapeHtmlLocal(address);
-  const safeLocation = escapeHtmlLocal(deliveryLocation);
-  const safeDistrict = escapeHtmlLocal(outsideDhakaLocation);
-  const safeNote = escapeHtmlLocal(deliveryNote);
-  const safePaymentNumber = escapeHtmlLocal(paymentNumber);
-  const safeTransactionId = escapeHtmlLocal(transactionId);
-
-  const activeOrigin = hostOrigin || window.location.origin;
-  let cleanOrigin = "";
-  if (activeOrigin) {
-    try {
-      const urlObj = new URL(activeOrigin);
-      cleanOrigin = urlObj.origin;
-    } catch (e) {
-      // Ignore
-    }
-  }
-
-  const finalPaymentMethod = deliveryPaymentMethod || paymentMethod || 'cod';
-  let paymentMethodBengali = "ক্যাশ অন ডেলিভারি (COD)";
-  if (finalPaymentMethod === 'bkash') {
-    paymentMethodBengali = "বিকাশ (অগ্রিম পেমেন্ট)";
-  } else if (finalPaymentMethod === 'nagad') {
-    paymentMethodBengali = "নগদ (অগ্রিম পেমেন্ট)";
-  }
-
-  let productDetails = "";
-  cartItems.forEach((item: any, i: number) => {
-    const safeItemName = escapeHtmlLocal(item.name || 'N/A');
-    const itemQty = item.quantity || 1;
-    const rowSum = (Number(item.price || 0) * itemQty).toFixed(0);
-    productDetails += `${i + 1}. ${safeItemName} (x${itemQty}) - ${rowSum} টাকা\n`;
-  });
-
-  let messageText = `🚨 <b>নতুন অর্ডার এসেছে!</b> (ID: ${escapeHtmlLocal(orderId)}) 🚨\n`;
-  messageText += `➖➖➖➖➖➖➖➖➖➖\n`;
-  messageText += `<b>👤 গ্রাহকের তথ্য:</b>\n`;
-  messageText += `<b>নাম:</b> ${safeCustomerName}\n`;
-  messageText += `<b>ফোন:</b> <a href="tel:${safePhoneNumber}">${safePhoneNumber}</a>\n`;
-  messageText += `<b>ঠিকানা:</b> ${safeExpressAddress}\n`;
-  messageText += `<b>এলাকা:</b> ${safeLocation}\n`;
-  
-  if (safeLocation.includes("বাইরে") && safeDistrict !== 'N/A' && safeDistrict !== '') {
-    messageText += `<b>জেলা/থানা:</b> ${safeDistrict}\n`;
-  }
-  
-  if (safeNote !== 'N/A' && safeNote !== '') {
-    messageText += `<b>বিশেষ নোট:</b> ${safeNote}\n`;
-  }
-
-  messageText += `➖➖➖➖➖➖➖➖➖➖\n`;
-  messageText += `<b>🛍️ পণ্যের তালিকা:</b>\n${productDetails}`;
-  messageText += `➖➖➖➖➖➖➖➖➖➖\n`;
-  messageText += `<b>💰 পেমেন্টের তথ্য:</b>\n`;
-  messageText += `<b>পেমেন্ট পদ্ধতি:</b> ${paymentMethodBengali}\n`;
-  
-  if (finalPaymentMethod === 'bkash' || finalPaymentMethod === 'nagad') {
-    messageText += `<b>প্রেরক নম্বর:</b> ${safePaymentNumber}\n`;
-    messageText += `<b>ট্রানজেকশন আইডি:</b> <code>${safeTransactionId}</code>\n`;
-  }
-
-  messageText += `<b>সাব-টোটাল:</b> ${Number(subTotal).toFixed(0)} টাকা\n`;
-  messageText += `<b>ডেলিভারি ফি:</b> ${Number(deliveryFee).toFixed(0)} টাকা\n`;
-  messageText += `<b>মোট মূল্য:</b> <b>${Number(totalAmount).toFixed(0)} টাকা</b>\n`;
-
-  if (cleanOrigin) {
-    messageText += `➖➖➖➖➖➖➖➖➖➖\n`;
-    messageText += `<b>🔗 অর্ডার ট্র্যাক করার লিংক:</b>\n`;
-    messageText += `<a href="${cleanOrigin}/#/order-track?orderId=${escapeHtmlLocal(orderId)}">এখানে ক্লিক করুন</a>\n`;
-  }
-
-  const telegramUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
-  await fetch(telegramUrl, {
-    method: "POST",
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      chat_id: CHAT_ID,
-      text: messageText,
-      parse_mode: 'HTML'
-    })
-  });
-}
-
 function OrderFormContent() {
   const { cart, clearCart, updateQuantity, removeFromCart, deliveryLocation, setDeliveryLocation } = useStore();
   const router = useRouter();
@@ -259,17 +141,23 @@ function OrderFormContent() {
         const newOrderRef = ref(database, `orders/${orderId}`);
         await set(newOrderRef, orderData);
 
-        // Save for guest tracking
-        if (userId.startsWith('GUEST_')) {
-          const myOrders = JSON.parse(localStorage.getItem('myOrders') || '[]');
+        // Save to localStorage for instant local tracking in this browser session
+        const myOrders = JSON.parse(localStorage.getItem('myOrders') || '[]');
+        if (!myOrders.includes(orderId)) {
           myOrders.push(orderId);
           localStorage.setItem('myOrders', JSON.stringify(myOrders));
-        } else {
-          // Save link to user's orders
-          await set(ref(database, `users/${userId}/orders/${orderId}`), true);
         }
 
-        // Send Telegram Notification via API Route with direct client fallback if it fails (important for direct static host like Netlify)
+        // If logged-in, link the order under their database account profile
+        if (user) {
+          try {
+            await set(ref(database, `users/${userId}/orders/${orderId}`), true);
+          } catch (dbErr) {
+            console.error("Could not write user orders link to database:", dbErr);
+          }
+        }
+
+        // Send Telegram Notification securely via Serverless API Route
         try {
           const res = await fetch('/api/telegram', {
             method: 'POST',
@@ -278,16 +166,10 @@ function OrderFormContent() {
           });
           const contentType = res.headers.get('content-type') || '';
           if (!res.ok || contentType.includes('text/html')) {
-            throw new Error("Local backend not available or returned non-JSON response. Attempting direct fallback.");
+            throw new Error("Local backend or serverless functions returned non-JSON response.");
           }
         } catch (e) {
-          console.warn("Failed to send telegram msg via backend. Running client-side direct fallback...", e);
-          try {
-            await sendTelegramDirectly({ ...orderData, hostOrigin: window.location.origin });
-            console.log("Direct client-side Telegram notification sent successfully!");
-          } catch (errDirect) {
-            console.error("Critical: direct telegram fallback failed", errDirect);
-          }
+          console.error("Failed to send telegram message securely via backend API:", e);
         }
 
         // Clear cart if not buy now

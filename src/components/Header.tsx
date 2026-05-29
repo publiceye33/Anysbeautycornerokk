@@ -81,6 +81,8 @@ export default function Header() {
       } else {
         setNotifications([]);
       }
+    }, (error) => {
+      console.warn("Notifications subscription error:", error);
     });
     return () => unsubscribe();
   }, [user]);
@@ -155,6 +157,8 @@ export default function Header() {
       }
 
       isFirstEvent = false;
+    }, (error) => {
+      console.warn("Orders subscription denied. Normal for non-admin users:", error);
     });
 
     return () => unsubscribe();

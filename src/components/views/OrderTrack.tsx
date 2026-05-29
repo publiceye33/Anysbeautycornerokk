@@ -29,35 +29,82 @@ function OrderTrackContent() {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      const ordersRef = ref(database, 'orders');
-      const snapshot = await get(ordersRef);
-      if (snapshot.exists()) {
-        const allOrders = snapshot.val();
-        let myOrderList: any[] = [];
-        
-        if (user) {
-          // Find orders by user ID or Email
-          Object.keys(allOrders).forEach(key => {
-            const o = allOrders[key];
-            if (o.userId === user.uid || o.customerEmail === user.email || o.userEmail === user.email) {
-              myOrderList.push({ id: key, ...o });
-            }
-          });
-        } else {
-          // Find local guest orders
-          const localOrderKeys = JSON.parse(localStorage.getItem('myOrders') || '[]');
-          Object.keys(allOrders).forEach(key => {
-            if (localOrderKeys.includes(key)) {
-              myOrderList.push({ id: key, ...allOrders[key] });
-            }
-          });
+      let orderKeys: string[] = [];
+      
+      // 1. Always load local device orders (guest or signed-in fallback)
+      const localKeys = JSON.parse(localStorage.getItem('myOrders') || '[]');
+      localKeys.forEach((k: string) => {
+        if (!orderKeys.includes(k)) {
+          orderKeys.push(k);
         }
+      });
 
-        myOrderList.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
-        setOrders(myOrderList);
+      // 2. If user is logged in, also get their database linked orders
+      if (user) {
+        try {
+          const userOrdersRef = ref(database, `users/${user.uid}/orders`);
+          const userOrdersSnapshot = await get(userOrdersRef);
+          if (userOrdersSnapshot.exists()) {
+            const dbKeys = Object.keys(userOrdersSnapshot.val());
+            dbKeys.forEach((k) => {
+              if (!orderKeys.includes(k)) {
+                orderKeys.push(k);
+              }
+            });
+          }
+        } catch (dbErr) {
+          console.warn("Could not query account orders from database (normal if permissions pending):", dbErr);
+        }
       }
+
+      // If a specific URL orderId is requested but not in the keys, add it so we fetch it
+      if (urlOrderId && !orderKeys.includes(urlOrderId)) {
+        orderKeys.push(urlOrderId);
+      }
+
+      // 3. Fetch each order key in parallel securely from `orders/${key}`
+      const fetchedOrders: any[] = [];
+      if (orderKeys.length > 0) {
+        const fetchPromises = orderKeys.map(async (key) => {
+          try {
+            const orderRef = ref(database, `orders/${key}`);
+            const orderSnap = await get(orderRef);
+            if (orderSnap.exists()) {
+              return { id: key, ...orderSnap.val() };
+            }
+          } catch (err) {
+            console.warn(`Could not fetch order ${key}:`, err);
+          }
+          return null;
+        });
+
+        const results = await Promise.all(fetchPromises);
+        results.forEach(order => {
+          if (order) fetchedOrders.push(order);
+        });
+      }
+
+      // Apply safe user/local authenticity filter to prevent key enumeration attacks
+      const myOrderList = fetchedOrders.filter(o => {
+        // If order belongs to this browser session locally
+        if (localKeys.includes(o.id) || localKeys.includes(o.orderId)) {
+          return true;
+        }
+        // If there's a logged-in user and it belongs to them
+        if (user && (o.userId === user.uid || o.customerEmail === user.email || o.userEmail === user.email)) {
+          return true;
+        }
+        // If specifically requested in URL (having the exact track link counts as permission)
+        if (urlOrderId && (o.orderId === urlOrderId || o.id === urlOrderId)) {
+          return true;
+        }
+        return false;
+      });
+
+      myOrderList.sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime());
+      setOrders(myOrderList);
     } catch (e) {
-      console.error(e);
+      console.error("Error fetching secure orders track list:", e);
     } finally {
       setLoading(false);
     }

@@ -1,0 +1,45 @@
+{
+  "rules": {
+    ".read": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'",
+    ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'",
+    
+    "products": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    
+    "events": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    
+    "reviews": {
+      "$productId": {
+        ".read": "true",
+        "$reviewId": {
+          ".write": "true" 
+        }
+      }
+    },
+    
+    "orders": {
+      ".read": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'",
+      "$orderId": {
+        ".read": "true", 
+        ".write": "data.val() == null || (auth != null && auth.token.email === 'mdnahidislam6714@gmail.com')" 
+      }
+    },
+    
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || auth.token.email === 'mdnahidislam6714@gmail.com')",
+        ".write": "auth != null && (auth.uid === $userId || auth.token.email === 'mdnahidislam6714@gmail.com')"
+      }
+    },
+    
+    "counters": {
+      ".read": "true",
+      ".write": "true"
+    }
+  }
+}
