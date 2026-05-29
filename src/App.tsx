@@ -16,6 +16,7 @@ import OrderFormView from '@/src/components/views/OrderForm';
 import OrderTrackView from '@/src/components/views/OrderTrack';
 import ThankYouView from '@/src/components/views/ThankYou';
 import ProfileView from '@/src/components/views/Profile';
+import NotificationsView from '@/src/components/views/Notifications';
 
 export default function App() {
   const pathname = usePathname();
@@ -108,9 +109,9 @@ export default function App() {
     } else if (pathname === '/thank-you') {
       return <ThankYouView />;
     } else if (pathname === '/profile') {
-      return <ProfileView initialTab="info" />;
+      return <ProfileView />;
     } else if (pathname === '/notifications') {
-      return <ProfileView initialTab="notifications" />;
+      return <NotificationsView />;
     } else if (pathname.startsWith('/product/')) {
       const productId = pathname.substring('/product/'.length);
       return <ProductDetail id={productId} />;
