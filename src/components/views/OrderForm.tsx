@@ -2,7 +2,7 @@ import React, { useState, Suspense, useMemo, useEffect } from 'react';
 import { useStore } from '@/src/lib/store';
 import { useRouter, useSearchParams } from '@/src/lib/navigation';
 import { database } from '@/src/lib/firebase';
-import { ref, set, runTransaction } from 'firebase/database';
+import { ref, set, runTransaction, get } from 'firebase/database';
 import { getAuth } from 'firebase/auth';
 import { toBengaliNumber } from '@/src/lib/utils';
 import LoadingScreen from '@/src/components/LoadingScreen';
@@ -40,6 +40,37 @@ function OrderFormContent() {
   });
 
   const buyNowCartParam = searchParams.get('cart');
+
+  // Pre-fill user profile info if logged in
+  useEffect(() => {
+    const authInstance = getAuth();
+    const currentUser = authInstance.currentUser;
+    if (currentUser) {
+      // Set name from Auth profile default
+      setFormData(prev => ({
+        ...prev,
+        customerName: currentUser.displayName || '',
+      }));
+
+      // Load additional profile details from Database
+      const profileRef = ref(database, `users/${currentUser.uid}/profile`);
+      get(profileRef).then((snapshot) => {
+        if (snapshot.exists()) {
+          const profile = snapshot.val();
+          setFormData(prev => ({
+            ...prev,
+            customerName: profile.name || prev.customerName,
+            phoneNumber: profile.phoneNumber || prev.phoneNumber,
+            address: profile.address || prev.address,
+            deliveryLocation: profile.deliveryLocation || prev.deliveryLocation,
+            outsideDhakaLocation: profile.outsideDhakaLocation || prev.outsideDhakaLocation,
+          }));
+        }
+      }).catch(err => {
+        console.warn("Could not pre-fill checkout details from user profile:", err);
+      });
+    }
+  }, []);
 
   useEffect(() => {
     if (!buyNowCartParam) {
