@@ -42,6 +42,41 @@ export default function ProductDetail({ id }: { id: string }) {
           if (data.image) {
             setMainImage(data.image.split(',')[0].trim());
           }
+
+          // Dynamic SEO Meta updates
+          document.title = `${data.name || 'পণ্য'} | Any's Beauty Corner`;
+          
+          const ogTitle = document.querySelector('meta[property="og:title"]');
+          if (ogTitle) {
+            ogTitle.setAttribute('content', `${data.name} | Any's Beauty Corner`);
+          }
+          
+          const ogDesc = document.querySelector('meta[property="og:description"]');
+          if (ogDesc) {
+            ogDesc.setAttribute('content', data.description || 'Any\'s Beauty Corner বাংলাদেশে সেরা ও ১০০% অথেন্টিক মেকআপ, স্কিনকেয়ার এবং কসমেটিকস প্রোডাক্টের বিশ্বস্ত অনলাইন বিউটি শপ।');
+          }
+          
+          const ogImg = document.querySelector('meta[property="og:image"]');
+          if (ogImg) {
+            const firstImg = data.image ? data.image.split(',')[0].trim() : 'https://anysbeautycorner.netlify.app/og-image.jpg';
+            ogImg.setAttribute('content', firstImg);
+          }
+
+          const twitterTitle = document.querySelector('meta[property="twitter:title"]');
+          if (twitterTitle) {
+            twitterTitle.setAttribute('content', `${data.name} | Any's Beauty Corner`);
+          }
+
+          const twitterDesc = document.querySelector('meta[property="twitter:description"]');
+          if (twitterDesc) {
+            twitterDesc.setAttribute('content', data.description || 'Any\'s Beauty Corner বাংলাদেশে সেরা ও ১০০% অথেন্টিক মেকআপ, স্কিনকেয়ার এবং কসমেটিকস প্রোডাক্টের বিশ্বস্ত অনলাইন বিউটি শপ।');
+          }
+
+          const twitterImg = document.querySelector('meta[property="twitter:image"]');
+          if (twitterImg) {
+            const firstImg = data.image ? data.image.split(',')[0].trim() : 'https://anysbeautycorner.netlify.app/og-image.jpg';
+            twitterImg.setAttribute('content', firstImg);
+          }
         } else {
           setError('প্রোডাক্ট পাওয়া যায়নি!');
         }

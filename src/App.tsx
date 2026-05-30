@@ -100,6 +100,25 @@ export default function App() {
     return () => unsubscribe();
   }, [setUser]);
 
+  // Dynamic document.title update based on pathname route changes
+  useEffect(() => {
+    if (pathname === '/') {
+      document.title = "Any's Beauty Corner | সেরা বিউটি প্রোডাক্ট";
+    } else if (pathname === '/order-form') {
+      document.title = "অর্ডার করুন | Any's Beauty Corner";
+    } else if (pathname === '/order-track') {
+      document.title = "অর্ডার ট্র্যাক করুন | Any's Beauty Corner";
+    } else if (pathname === '/profile') {
+      document.title = "আমার প্রোফাইল | Any's Beauty Corner";
+    } else if (pathname === '/notifications') {
+      document.title = "নোটিফিকেশন | Any's Beauty Corner";
+    } else if (pathname === '/thank-you') {
+      document.title = "ধন্যবাদ! | Any's Beauty Corner";
+    } else if (pathname.startsWith('/product/')) {
+      document.title = "প্রোডাক্ট বিবরণ | Any's Beauty Corner";
+    }
+  }, [pathname]);
+
   // Handle client SPA router views routing
   const renderView = () => {
     if (pathname === '/order-form') {
