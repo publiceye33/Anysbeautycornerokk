@@ -7,7 +7,7 @@ import {
   Calendar, ShieldCheck, Clock, Clipboard, Sparkles, ShoppingBag, 
   HelpCircle, ChevronRight, AlertCircle, RefreshCw 
 } from 'lucide-react';
-import { signInWithRedirect } from 'firebase/auth';
+import { signInWithPopup } from 'firebase/auth';
 import { useRouter, useSearchParams } from '@/src/lib/navigation';
 import LoadingScreen from '@/src/components/LoadingScreen';
 import { toBengaliNumber } from '@/src/lib/utils';
@@ -150,7 +150,7 @@ function OrderTrackContent() {
 
   const handleLogin = async () => {
     try {
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error('Login failed:', error);
     }

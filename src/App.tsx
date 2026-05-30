@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { usePathname } from '@/src/lib/navigation';
 import { useStore } from '@/src/lib/store';
 import { auth, database } from '@/src/lib/firebase';
-import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
+import { onAuthStateChanged } from 'firebase/auth';
 import { ref, onValue, get, set } from 'firebase/database';
 
 // Layout & UI components
@@ -125,37 +125,6 @@ export default function App() {
 
   // Handle baseline user authentication state tracking
   useEffect(() => {
-    // Handle redirect result from Google login
-    getRedirectResult(auth)
-      .then((result) => {
-        if (result?.user) {
-          const u = result.user;
-          setUser({
-            uid: u.uid,
-            email: u.email,
-            displayName: u.displayName,
-            photoURL: u.photoURL,
-          });
-          // Check/write user in database
-          const userRef = ref(database, `users/${u.uid}`);
-          get(userRef).then((snapshot) => {
-            if (!snapshot.exists()) {
-              set(userRef, {
-                name: u.displayName || 'N/A',
-                email: u.email || 'N/A',
-                photoURL: u.photoURL || '',
-                createdAt: new Date().toISOString(),
-              });
-            }
-          }).catch((err) => {
-            console.error("Error reading/writing user DB state during redirect result:", err);
-          });
-        }
-      })
-      .catch((error) => {
-        console.error("Error handling Google redirect result:", error);
-      });
-
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser({

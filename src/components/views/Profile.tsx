@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { database, auth, googleProvider } from '@/src/lib/firebase';
 import { ref, get, set, update } from 'firebase/database';
-import { signInWithRedirect, signOut } from 'firebase/auth';
+import { signInWithPopup, signOut } from 'firebase/auth';
 import { useStore } from '@/src/lib/store';
 import { useRouter } from '@/src/lib/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -41,7 +41,7 @@ export default function ProfileView() {
   // Google Sign-In Trigger
   const handleLogin = async () => {
     try {
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch (e) {
       console.error("Login failed:", e);
       setErrorMsg('লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/src/lib/store';
 import { auth, googleProvider, database } from '@/src/lib/firebase';
-import { signOut, signInWithRedirect } from 'firebase/auth';
+import { signOut, signInWithPopup } from 'firebase/auth';
 import { ref, onValue, push, update, get, set } from 'firebase/database';
 import {
   ShoppingBag,
@@ -171,7 +171,7 @@ export default function Header() {
   const handleLogin = async () => {
     try {
       setIsUserMenuOpen(false);
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch (error) {
       console.error('Login failed', error);
     }

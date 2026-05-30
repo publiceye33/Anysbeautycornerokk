@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { database, auth, googleProvider } from '@/src/lib/firebase';
 import { ref, get, set, update, onValue } from 'firebase/database';
-import { signInWithRedirect } from 'firebase/auth';
+import { signInWithPopup } from 'firebase/auth';
 import { useStore } from '@/src/lib/store';
 import { useRouter } from '@/src/lib/navigation';
 import { 
@@ -102,7 +102,7 @@ export default function NotificationsView() {
   // Google Sign-In Trigger
   const handleLogin = async () => {
     try {
-      await signInWithRedirect(auth, googleProvider);
+      await signInWithPopup(auth, googleProvider);
     } catch (e) {
       console.error("Login failed:", e);
     }
