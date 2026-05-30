@@ -34,6 +34,8 @@ export interface AppState {
   user: any | null;
   deliveryLocation: DeliveryLocation;
   categories?: Category[];
+  logoUrl?: string;
+  setLogoUrl?: (logoUrl: string) => void;
   addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, amount: number) => void;

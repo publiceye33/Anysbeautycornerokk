@@ -38,6 +38,8 @@ export const useStore = create<AppState>()(
       setDeliveryLocation: (location) => set({ deliveryLocation: location }),
       categories: [],
       setCategories: (categories) => set({ categories }),
+      logoUrl: '',
+      setLogoUrl: (logoUrl) => set({ logoUrl }),
     }),
     {
       name: 'anybeauty-store',

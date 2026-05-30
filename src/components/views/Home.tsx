@@ -195,7 +195,7 @@ function HomeContent() {
           <div className="text-left">
             <span className="text-rose-950 font-bold tracking-[0.4em] uppercase text-[8px] md:text-[9px] mb-1 md:mb-2 block opacity-60 ml-px md:ml-1">Curation</span>
             <h2 className="text-2xl md:text-5xl font-serif font-medium text-gray-900 leading-[1] tracking-tight italic">
-              {filterCat ? (categories?.find(c => c.id === filterCat)?.name || (filterCat === 'skincare' ? 'স্কিনকেয়ার' : filterCat === 'cosmetics' ? 'মেকআপ' : filterCat === 'haircare' ? 'হেয়ারকেয়ার' : filterCat)) : 'সকল কালেকশন'}
+              {filterCat ? (categories?.find(c => c.id === filterCat)?.name || filterCat) : 'সকল কালেকশন'}
             </h2>
           </div>
           {filterCat && (

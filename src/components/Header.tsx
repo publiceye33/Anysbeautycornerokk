@@ -27,6 +27,7 @@ export default function Header() {
     user,
     setUser,
     categories,
+    logoUrl,
   } = useStore();
   const router = useRouter();
   
@@ -203,7 +204,7 @@ export default function Header() {
           >
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:mr-3 mr-2 bg-white overflow-hidden relative shadow-md transform rotate-3 group-hover:rotate-0 transition-transform shrink-0 flex items-center justify-center">
               <img
-                src="/logo.png"
+                src={logoUrl || "/logo.png"}
                 alt="Logo"
                 className="w-full h-full object-contain p-1"
                 referrerPolicy="no-referrer"
@@ -463,7 +464,7 @@ export default function Header() {
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 bg-white rounded-xl overflow-hidden relative shadow-sm transform -rotate-3 flex items-center justify-center">
                     <img
-                      src="/logo.png"
+                      src={logoUrl || "/logo.png"}
                       alt="Logo"
                       className="w-full h-full object-contain p-1"
                       referrerPolicy="no-referrer"
@@ -565,11 +566,7 @@ export default function Header() {
                               exit={{ height: 0, opacity: 0 }}
                               className="divide-y divide-gray-100 overflow-hidden bg-white border-t border-gray-50"
                             >
-                              {(categories && categories.length > 0 ? categories : [
-                                { id: 'skincare', name: 'স্কিনকেয়ার', icon: '✨' },
-                                { id: 'cosmetics', name: 'মেকআপ', icon: '💄' },
-                                { id: 'haircare', name: 'হেয়ারকেয়ার', icon: '🧴' }
-                              ]).map((item, idx) => (
+                              {categories && categories.map((item, idx) => (
                                 <li key={item.id || idx}>
                                   <a
                                     href={`#/?filter=${item.id}`}
@@ -615,7 +612,7 @@ export default function Header() {
                 <div className="flex items-center gap-2 mb-4">
                   <div className="h-8 w-8 rounded-xl bg-white overflow-hidden relative shadow-sm flex items-center justify-center">
                     <img
-                      src="/logo.png"
+                      src={logoUrl || "/logo.png"}
                       alt="Logo"
                       className="w-full h-full object-contain p-1"
                       referrerPolicy="no-referrer"

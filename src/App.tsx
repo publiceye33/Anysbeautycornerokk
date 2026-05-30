@@ -21,7 +21,24 @@ import NotificationsView from '@/src/components/views/Notifications';
 
 export default function App() {
   const pathname = usePathname();
-  const { setUser, setCategories } = useStore();
+  const { setUser, setCategories, setLogoUrl } = useStore();
+
+  // Listen to logoUrl in Firebase RTDB
+  useEffect(() => {
+    if (!setLogoUrl) return;
+    const logoRef = ref(database, 'settings/logoUrl');
+    const unsubLogo = onValue(logoRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setLogoUrl(snapshot.val());
+      } else {
+        setLogoUrl('');
+      }
+    });
+
+    return () => {
+      unsubLogo();
+    };
+  }, [setLogoUrl]);
 
   // Listen to categories in Firebase RTDB
   useEffect(() => {
