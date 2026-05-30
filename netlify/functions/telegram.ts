@@ -104,9 +104,9 @@ export async function handler(event: NetlifyEvent) {
     const finalPaymentMethod = deliveryPaymentMethod || paymentMethod || 'cod';
     let paymentMethodBengali = "ক্যাশ অন ডেলিভারি (COD)";
     if (finalPaymentMethod === 'bkash') {
-      paymentMethodBengali = "বিকাশ (অগ্রিম পেমেন্ট)";
+      paymentMethodBengali = "বিকাশ (ডেলিভারি চার্জ অগ্রিম)";
     } else if (finalPaymentMethod === 'nagad') {
-      paymentMethodBengali = "নগদ (অগ্রিম পেমেন্ট)";
+      paymentMethodBengali = "নগদ (ডেলিভারি চার্জ অগ্রিম)";
     }
 
     let productDetails = "";

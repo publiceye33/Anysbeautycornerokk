@@ -111,7 +111,11 @@ function ThankYouContent() {
                 <div>
                   <span className="text-[10px] font-bold text-rose-500 tracking-wider uppercase block mb-0.5">পেমেন্ট পদ্ধতি</span>
                   <span className="font-semibold text-gray-750 text-xs">
-                    {order.deliveryPaymentMethod ? (order.deliveryPaymentMethod === 'bkash' ? 'বিকাশ (অগ্রিম)' : 'নগদ (অগ্রিম)') : 'ক্যাশ অন ডেলিভারি'}
+                    {order.deliveryPaymentMethod === 'bkash' 
+                      ? 'বিকাশ (ডেলিভারি চার্জ অগ্রিম)' 
+                      : order.deliveryPaymentMethod === 'nagad' 
+                        ? 'নগদ (ডেলিভারি চার্জ অগ্রিম)' 
+                        : 'ক্যাশ অন ডেলিভারি'}
                   </span>
                 </div>
               </div>
