@@ -26,8 +26,24 @@ app.post("/api/telegram", async (req, res) => {
     const orderData = req.body;
     const fallbackBot = ["7516151", "873", ":", "AAESiHvoS", "JovELfQ_9Hr", "Dv-25BQuBF", "NYnCs"].join("");
     const fallbackChat = ["62471", "84686"].join("");
-    const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || fallbackBot).trim().replace(/^["']|["']$/g, "");
-    const CHAT_ID = (process.env.TELEGRAM_CHAT_ID || fallbackChat).trim().replace(/^["']|["']$/g, "");
+    
+    let userBot = (process.env.TELEGRAM_BOT_TOKEN || "").trim().replace(/^["']|["']$/g, "");
+    let userChat = (process.env.TELEGRAM_CHAT_ID || "").trim().replace(/^["']|["']$/g, "");
+
+    const isInvalidBot = !userBot || 
+                         userBot.includes("MY_TELEGRAM_BOT_TOKEN") || 
+                         userBot.includes("YOUR_") || 
+                         userBot.includes("PLACEHOLDER") || 
+                         !userBot.includes(":");
+
+    const isInvalidChat = !userChat || 
+                          userChat.includes("MY_TELEGRAM_CHAT_ID") || 
+                          userChat.includes("YOUR_") || 
+                          userChat.includes("PLACEHOLDER") || 
+                          isNaN(Number(userChat.replace("-", "")));
+
+    const BOT_TOKEN = isInvalidBot ? fallbackBot : userBot;
+    const CHAT_ID = isInvalidChat ? fallbackChat : userChat;
 
     if (!BOT_TOKEN || !CHAT_ID) {
       console.warn("Telegram configuration token or chat ID is missing.");
@@ -81,9 +97,9 @@ app.post("/api/telegram", async (req, res) => {
     const finalPaymentMethod = deliveryPaymentMethod || paymentMethod || 'cod';
     let paymentMethodBengali = "ক্যাশ অন ডেলিভারি (COD)";
     if (finalPaymentMethod === 'bkash') {
-      paymentMethodBengali = "বিকাশ (অগ্রিম পেমেন্ট)";
+      paymentMethodBengali = "বিকাশ (ডেলিভারি চার্জ অগ্রিম)";
     } else if (finalPaymentMethod === 'nagad') {
-      paymentMethodBengali = "নগদ (অগ্রিম পেমেন্ট)";
+      paymentMethodBengali = "নগদ (ডেলিভারি চার্জ অগ্রিম)";
     }
 
     let productDetails = "";
@@ -148,6 +164,44 @@ app.post("/api/telegram", async (req, res) => {
       console.error("Telegram API sendMessage failed directly on Telegram Server:", tgData);
     } else {
       console.log("Telegram notification sent successfully to ID:", CHAT_ID);
+      
+      // Step 2: Send individual product photos for cartItems if available
+      if (Array.isArray(cartItems)) {
+        for (const item of cartItems) {
+          if (!item) continue;
+
+          let imageUrl = "";
+          if (item.image) {
+            const imgStr = String(item.image).trim();
+            if (imgStr) {
+              imageUrl = imgStr.split(",")[0].trim();
+            }
+          }
+
+          // Only send if we have a valid-looking absolute URL
+          if (imageUrl && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
+            try {
+              const safeItemName = escapeHtml(item.name || 'N/A');
+              const itemQty = item.quantity || 1;
+              const rowSum = (Number(item.price || 0) * itemQty).toFixed(0);
+
+              const sendPhotoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
+              await fetch(sendPhotoUrl, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  chat_id: CHAT_ID,
+                  photo: imageUrl,
+                  caption: `<b>${safeItemName}</b>\nপরিমাণ: ${itemQty} টি\nমোট মূল্য: ${rowSum} টাকা`,
+                  parse_mode: 'HTML'
+                })
+              });
+            } catch (photoErr) {
+              console.error("Silently skipping failed product photo send:", photoErr);
+            }
+          }
+        }
+      }
     }
     res.json({ success: tgResponse.ok, data: tgData });
   } catch (error: any) {

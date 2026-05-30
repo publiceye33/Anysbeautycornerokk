@@ -2,8 +2,8 @@ import { useEffect } from 'react';
 import { usePathname } from '@/src/lib/navigation';
 import { useStore } from '@/src/lib/store';
 import { auth, database } from '@/src/lib/firebase';
-import { onAuthStateChanged } from 'firebase/auth';
-import { ref, onValue } from 'firebase/database';
+import { onAuthStateChanged, getRedirectResult } from 'firebase/auth';
+import { ref, onValue, get, set } from 'firebase/database';
 
 // Layout & UI components
 import Header from '@/src/components/Header';
@@ -21,19 +21,10 @@ import NotificationsView from '@/src/components/views/Notifications';
 
 export default function App() {
   const pathname = usePathname();
-  const { setUser, setLogoUrl, setCategories } = useStore();
+  const { setUser, setCategories } = useStore();
 
-  // Listen to categories and logoUrl in Firebase RTDB
+  // Listen to categories in Firebase RTDB
   useEffect(() => {
-    const logoRef = ref(database, 'settings/logoUrl');
-    const unsubLogo = onValue(logoRef, (snapshot) => {
-      if (snapshot.exists()) {
-        setLogoUrl(snapshot.val() || '');
-      } else {
-        setLogoUrl('');
-      }
-    });
-
     const categoriesRef = ref(database, 'categories');
     const unsubCats = onValue(categoriesRef, (snapshot) => {
       if (snapshot.exists()) {
@@ -51,10 +42,9 @@ export default function App() {
     });
 
     return () => {
-      unsubLogo();
       unsubCats();
     };
-  }, [setLogoUrl, setCategories]);
+  }, [setCategories]);
 
   // Scroll Restoration Manager
   useEffect(() => {
@@ -118,6 +108,37 @@ export default function App() {
 
   // Handle baseline user authentication state tracking
   useEffect(() => {
+    // Handle redirect result from Google login
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          const u = result.user;
+          setUser({
+            uid: u.uid,
+            email: u.email,
+            displayName: u.displayName,
+            photoURL: u.photoURL,
+          });
+          // Check/write user in database
+          const userRef = ref(database, `users/${u.uid}`);
+          get(userRef).then((snapshot) => {
+            if (!snapshot.exists()) {
+              set(userRef, {
+                name: u.displayName || 'N/A',
+                email: u.email || 'N/A',
+                photoURL: u.photoURL || '',
+                createdAt: new Date().toISOString(),
+              });
+            }
+          }).catch((err) => {
+            console.error("Error reading/writing user DB state during redirect result:", err);
+          });
+        }
+      })
+      .catch((error) => {
+        console.error("Error handling Google redirect result:", error);
+      });
+
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser({
@@ -125,6 +146,21 @@ export default function App() {
           email: user.email,
           displayName: user.displayName,
           photoURL: user.photoURL,
+        });
+
+        // Also ensure user exists in database when auth state triggers
+        const userRef = ref(database, `users/${user.uid}`);
+        get(userRef).then((snapshot) => {
+          if (!snapshot.exists()) {
+            set(userRef, {
+              name: user.displayName || 'N/A',
+              email: user.email || 'N/A',
+              photoURL: user.photoURL || '',
+              createdAt: new Date().toISOString(),
+            });
+          }
+        }).catch((err) => {
+          console.warn("DB user sync warning (might be offline/restricted):", err);
         });
       } else {
         setUser(null);

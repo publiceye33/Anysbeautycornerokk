@@ -4,7 +4,6 @@ import { useStore } from '@/src/lib/store';
 
 export default function LoadingScreen({ isLoading }: { isLoading?: boolean }) {
   const [isVisible, setIsVisible] = useState(true);
-  const { logoUrl } = useStore();
 
   useEffect(() => {
     if (isLoading === undefined) {
@@ -39,7 +38,7 @@ export default function LoadingScreen({ isLoading }: { isLoading?: boolean }) {
             >
               <div className="w-[90%] h-[90%] rounded-full overflow-hidden border border-rose-500/10 bg-white flex flex-col items-center justify-center relative">
                  <img 
-                   src={logoUrl || "/logo.png"} 
+                   src="/logo.png" 
                    alt="Any's Beauty Corner Logo" 
                    className="w-full h-full object-contain p-2"
                    referrerPolicy="no-referrer"

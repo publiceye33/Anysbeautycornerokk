@@ -7,7 +7,7 @@ const metaEnv = (import.meta as any).env || {};
 
 const firebaseConfig = {
   apiKey: metaEnv.VITE_FIREBASE_API_KEY || "AIzaSyCVSzQS1c7H4BLhsDF_fW8wnqUN4B35LPA",
-  authDomain: metaEnv.VITE_FIREBASE_AUTH_DOMAIN || "nahid-6714.firebaseapp.com",
+  authDomain: metaEnv.VITE_FIREBASE_AUTH_DOMAIN || "anysbeautycorner.netlify.app",
   databaseURL: metaEnv.VITE_FIREBASE_DATABASE_URL || "https://nahid-6714-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: metaEnv.VITE_FIREBASE_PROJECT_ID || "nahid-6714",
   storageBucket: metaEnv.VITE_FIREBASE_STORAGE_BUCKET || "nahid-6714.appspot.com",

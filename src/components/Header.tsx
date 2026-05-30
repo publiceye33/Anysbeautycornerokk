@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useStore } from '@/src/lib/store';
 import { auth, googleProvider, database } from '@/src/lib/firebase';
-import { signOut, signInWithPopup } from 'firebase/auth';
+import { signOut, signInWithRedirect } from 'firebase/auth';
 import { ref, onValue, push, update, get, set } from 'firebase/database';
 import {
   ShoppingBag,
@@ -25,7 +25,6 @@ export default function Header() {
     setIsMobileMenuOpen,
     user,
     setUser,
-    logoUrl,
     categories,
   } = useStore();
   const router = useRouter();
@@ -168,28 +167,8 @@ export default function Header() {
 
   const handleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const userData = {
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        photoURL: result.user.photoURL,
-      };
-      setUser(userData);
-
-      // Check if user exists in database, if not create
-      const userRef = ref(database, `users/${result.user.uid}`);
-      get(userRef).then((snapshot) => {
-        if (!snapshot.exists()) {
-          set(userRef, {
-            name: result.user.displayName,
-            email: result.user.email,
-            photoURL: result.user.photoURL,
-            createdAt: new Date().toISOString(),
-          });
-        }
-      });
       setIsUserMenuOpen(false);
+      await signInWithRedirect(auth, googleProvider);
     } catch (error) {
       console.error('Login failed', error);
     }
@@ -222,7 +201,7 @@ export default function Header() {
           >
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:mr-3 mr-2 bg-white overflow-hidden relative shadow-md transform rotate-3 group-hover:rotate-0 transition-transform shrink-0 flex items-center justify-center">
               <img
-                src={logoUrl || "/logo.png"}
+                src="/logo.png"
                 alt="Logo"
                 className="w-full h-full object-contain p-1"
                 referrerPolicy="no-referrer"
@@ -468,7 +447,7 @@ export default function Header() {
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 bg-white rounded-xl overflow-hidden relative shadow-sm transform -rotate-3 flex items-center justify-center">
                     <img
-                      src={logoUrl || "/logo.png"}
+                      src="/logo.png"
                       alt="Logo"
                       className="w-full h-full object-contain p-1"
                       referrerPolicy="no-referrer"
@@ -599,7 +578,7 @@ export default function Header() {
                 <div className="flex items-center gap-2 mb-4">
                   <div className="h-8 w-8 rounded-xl bg-white overflow-hidden relative shadow-sm flex items-center justify-center">
                     <img
-                      src={logoUrl || "/logo.png"}
+                      src="/logo.png"
                       alt="Logo"
                       className="w-full h-full object-contain p-1"
                       referrerPolicy="no-referrer"

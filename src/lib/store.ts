@@ -36,9 +36,7 @@ export const useStore = create<AppState>()(
       setIsMobileMenuOpen: (isOpen) => set({ isMobileMenuOpen: isOpen }),
       setUser: (user) => set({ user }),
       setDeliveryLocation: (location) => set({ deliveryLocation: location }),
-      logoUrl: '',
       categories: [],
-      setLogoUrl: (logoUrl) => set({ logoUrl }),
       setCategories: (categories) => set({ categories }),
     }),
     {

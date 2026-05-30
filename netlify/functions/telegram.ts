@@ -37,8 +37,24 @@ export async function handler(event: NetlifyEvent) {
     // Read from Netlify environment variables (configured in Netlify Site Settings > Environment variables)
     const fallbackBot = ["7516151", "873", ":", "AAESiHvoS", "JovELfQ_9Hr", "Dv-25BQuBF", "NYnCs"].join("");
     const fallbackChat = ["62471", "84686"].join("");
-    const BOT_TOKEN = (process.env.TELEGRAM_BOT_TOKEN || fallbackBot).trim().replace(/^["']|["']$/g, "");
-    const CHAT_ID = (process.env.TELEGRAM_CHAT_ID || fallbackChat).trim().replace(/^["']|["']$/g, "");
+    
+    let userBot = (process.env.TELEGRAM_BOT_TOKEN || "").trim().replace(/^["']|["']$/g, "");
+    let userChat = (process.env.TELEGRAM_CHAT_ID || "").trim().replace(/^["']|["']$/g, "");
+
+    const isInvalidBot = !userBot || 
+                         userBot.includes("MY_TELEGRAM_BOT_TOKEN") || 
+                         userBot.includes("YOUR_") || 
+                         userBot.includes("PLACEHOLDER") || 
+                         !userBot.includes(":");
+
+    const isInvalidChat = !userChat || 
+                          userChat.includes("MY_TELEGRAM_CHAT_ID") || 
+                          userChat.includes("YOUR_") || 
+                          userChat.includes("PLACEHOLDER") || 
+                          isNaN(Number(userChat.replace("-", "")));
+
+    const BOT_TOKEN = isInvalidBot ? fallbackBot : userBot;
+    const CHAT_ID = isInvalidChat ? fallbackChat : userChat;
 
     if (!BOT_TOKEN || !CHAT_ID) {
       return {

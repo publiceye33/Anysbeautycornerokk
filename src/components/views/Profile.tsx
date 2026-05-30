@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { database, auth, googleProvider } from '@/src/lib/firebase';
 import { ref, get, set, update } from 'firebase/database';
-import { signInWithPopup, signOut } from 'firebase/auth';
+import { signInWithRedirect, signOut } from 'firebase/auth';
 import { useStore } from '@/src/lib/store';
 import { useRouter } from '@/src/lib/navigation';
 import { motion, AnimatePresence } from 'motion/react';
@@ -41,26 +41,7 @@ export default function ProfileView() {
   // Google Sign-In Trigger
   const handleLogin = async () => {
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const userData = {
-        uid: result.user.uid,
-        email: result.user.email,
-        displayName: result.user.displayName,
-        photoURL: result.user.photoURL,
-      };
-      setUser(userData);
-
-      // Check / Create User in db
-      const userRef = ref(database, `users/${result.user.uid}`);
-      const userSnap = await get(userRef);
-      if (!userSnap.exists()) {
-        await set(userRef, {
-          name: result.user.displayName,
-          email: result.user.email,
-          photoURL: result.user.photoURL,
-          createdAt: new Date().toISOString(),
-        });
-      }
+      await signInWithRedirect(auth, googleProvider);
     } catch (e) {
       console.error("Login failed:", e);
       setErrorMsg('লগইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');

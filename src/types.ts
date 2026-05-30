@@ -33,7 +33,6 @@ export interface AppState {
   isMobileMenuOpen: boolean;
   user: any | null;
   deliveryLocation: DeliveryLocation;
-  logoUrl?: string;
   categories?: Category[];
   addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeFromCart: (id: string) => void;
@@ -43,6 +42,5 @@ export interface AppState {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   setUser: (user: any) => void;
   setDeliveryLocation: (location: DeliveryLocation) => void;
-  setLogoUrl: (url: string) => void;
   setCategories: (categories: Category[]) => void;
 }
