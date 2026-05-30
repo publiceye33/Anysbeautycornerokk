@@ -167,6 +167,44 @@ export async function handler(event: NetlifyEvent) {
 
     const tgData = await tgResponse.json();
 
+    // Step 2: Send individual product photos for cartItems if available
+    if (Array.isArray(cartItems)) {
+      for (const item of cartItems) {
+        if (!item) continue;
+
+        let imageUrl = "";
+        if (item.image) {
+          const imgStr = String(item.image).trim();
+          if (imgStr) {
+            imageUrl = imgStr.split(",")[0].trim();
+          }
+        }
+
+        // Only send if we have a valid-looking absolute URL
+        if (imageUrl && (imageUrl.startsWith("http://") || imageUrl.startsWith("https://"))) {
+          try {
+            const safeItemName = escapeHtml(item.name || 'N/A');
+            const itemQty = item.quantity || 1;
+            const rowSum = (Number(item.price || 0) * itemQty).toFixed(0);
+
+            const sendPhotoUrl = `https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto`;
+            await fetch(sendPhotoUrl, {
+              method: "POST",
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                chat_id: CHAT_ID,
+                photo: imageUrl,
+                caption: `<b>${safeItemName}</b>\nপরিমাণ: ${itemQty} টি\nমোট মূল্য: ${rowSum} টাকা`,
+                parse_mode: 'HTML'
+              })
+            });
+          } catch (photoErr) {
+            console.error("Silently skipping failed product photo send:", photoErr);
+          }
+        }
+      }
+    }
+
     return {
       statusCode: 200,
       headers: {
