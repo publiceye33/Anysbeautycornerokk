@@ -7,12 +7,13 @@ const metaEnv = (import.meta as any).env || {};
 
 const firebaseConfig = {
   apiKey: metaEnv.VITE_FIREBASE_API_KEY || "AIzaSyCVSzQS1c7H4BLhsDF_fW8wnqUN4B35LPA",
-  authDomain: metaEnv.VITE_FIREBASE_AUTH_DOMAIN || "anysbeautycorner.netlify.app",
+  authDomain: metaEnv.VITE_FIREBASE_AUTH_DOMAIN || "nahid-6714.firebaseapp.com",
   databaseURL: metaEnv.VITE_FIREBASE_DATABASE_URL || "https://nahid-6714-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: metaEnv.VITE_FIREBASE_PROJECT_ID || "nahid-6714",
-  storageBucket: metaEnv.VITE_FIREBASE_STORAGE_BUCKET || "nahid-6714.appspot.com",
+  storageBucket: metaEnv.VITE_FIREBASE_STORAGE_BUCKET || "nahid-6714.firebasestorage.app",
   messagingSenderId: metaEnv.VITE_FIREBASE_MESSAGING_SENDER_ID || "505741217147",
   appId: metaEnv.VITE_FIREBASE_APP_ID || "1:505741217147:web:25ed4e9f0d00e3c4d381de",
+  measurementId: metaEnv.VITE_FIREBASE_MEASUREMENT_ID || "G-QZ7CTRKHCW",
 };
 
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();

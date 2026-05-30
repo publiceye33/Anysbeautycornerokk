@@ -30,6 +30,8 @@ export default function Header() {
     logoUrl,
   } = useStore();
   const router = useRouter();
+
+
   
   const cartItemCount = cart.reduce(
     (total, item) => total + (item.quantity || 0),
@@ -221,32 +223,16 @@ export default function Header() {
             <a href="#/" className="hover:opacity-100 transition-opacity">
               হোম
             </a>
-            {categories && categories.length > 0 ? (
-              categories.map((item, idx) => (
-                <a
-                  key={item.id || idx}
-                  href={`#/?filter=${item.id}`}
-                  className="hover:opacity-100 transition-opacity capitalize"
-                >
-                  {item.name}
-                </a>
-              ))
-            ) : (
-              <>
-                <a
-                  href="#/?filter=skincare"
-                  className="hover:opacity-100 transition-opacity"
-                >
-                  স্কিনকেয়ার
-                </a>
-                <a
-                  href="#/?filter=cosmetics"
-                  className="hover:opacity-100 transition-opacity"
-                >
-                  মেকআপ
-                </a>
-              </>
-            )}
+            {categories && categories.map((item, idx) => (
+              <a
+                key={item.id || idx}
+                href={`#/?filter=${item.id}`}
+                className="hover:opacity-100 transition-opacity capitalize flex items-center gap-1.5"
+              >
+                {item.icon && <span className="text-sm shrink-0">{item.icon}</span>}
+                <span>{item.name}</span>
+              </a>
+            ))}
             <a
               href="#/order-track"
               className="hover:opacity-100 transition-opacity"

@@ -35,7 +35,9 @@ export interface AppState {
   deliveryLocation: DeliveryLocation;
   categories?: Category[];
   logoUrl?: string;
+  rtdbError?: string | null;
   setLogoUrl?: (logoUrl: string) => void;
+  setRtdbError?: (error: string | null) => void;
   addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, amount: number) => void;

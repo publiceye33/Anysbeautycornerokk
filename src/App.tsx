@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { usePathname } from '@/src/lib/navigation';
 import { useStore } from '@/src/lib/store';
 import { auth, database } from '@/src/lib/firebase';
@@ -21,7 +21,7 @@ import NotificationsView from '@/src/components/views/Notifications';
 
 export default function App() {
   const pathname = usePathname();
-  const { setUser, setCategories, setLogoUrl } = useStore();
+  const { setUser, setCategories, setLogoUrl, rtdbError, setRtdbError } = useStore();
 
   // Listen to logoUrl in Firebase RTDB
   useEffect(() => {
@@ -44,24 +44,51 @@ export default function App() {
   useEffect(() => {
     const categoriesRef = ref(database, 'categories');
     const unsubCats = onValue(categoriesRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const val = snapshot.val();
-        let list: any[] = [];
-        if (Array.isArray(val)) {
-          list = val.filter(Boolean);
-        } else if (typeof val === 'object') {
-          list = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+      try {
+        if (setRtdbError) {
+          setRtdbError(null);
         }
-        setCategories(list);
-      } else {
-        setCategories([]);
+        if (snapshot.exists()) {
+          const val = snapshot.val();
+          let list: any[] = [];
+          if (Array.isArray(val)) {
+            list = val.map((item, idx) => {
+              if (item && typeof item === 'object') {
+                return { ...item, id: item.id || String(idx) };
+              }
+              return { id: String(idx), name: String(item) };
+            }).filter(Boolean);
+          } else if (typeof val === 'object' && val !== null) {
+            list = Object.keys(val).map(k => {
+              const item = val[k];
+              if (item && typeof item === 'object') {
+                return { ...item, id: item.id || k };
+              }
+              return { id: k, name: String(item) };
+            });
+          }
+          // Filter out categories that don't have a valid name
+          list = list.filter(item => item && item.name && typeof item.name === 'string' && item.name.trim() !== '');
+          console.log("Categories successfully loaded from RTDB:", list);
+          setCategories(list);
+        } else {
+          console.info("Categories node is empty in RTDB");
+          setCategories([]);
+        }
+      } catch (err) {
+        console.error("Error parsing categories snapshot:", err);
+      }
+    }, (error) => {
+      console.error("Firebase read error categoriesRef:", error);
+      if (setRtdbError) {
+        setRtdbError(error.message || String(error));
       }
     });
 
     return () => {
       unsubCats();
     };
-  }, [setCategories]);
+  }, [setCategories, setRtdbError]);
 
   // Scroll Restoration Manager
   useEffect(() => {
@@ -195,10 +222,96 @@ export default function App() {
     }
   };
 
+  const [showRulesAlert, setShowRulesAlert] = useState(true);
+  const [copiedRules, setCopiedRules] = useState(false);
+
+  const rulesText = `{
+  "rules": {
+    "products": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    "categories": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    "settings": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    "events": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    "reviews": {
+      "$productId": {
+        ".read": "true",
+        "$reviewId": {
+          ".write": "true" 
+        }
+      }
+    },
+    "orders": {
+      ".read": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'",
+      "$orderId": {
+        ".read": "true", 
+        ".write": "data.val() == null || (auth != null && auth.token.email === 'mdnahidislam6714@gmail.com')" 
+      }
+    },
+    "users": {
+      "$userId": {
+        ".read": "auth != null && (auth.uid === $userId || auth.token.email === 'mdnahidislam6714@gmail.com')",
+        ".write": "auth != null && (auth.uid === $userId || auth.token.email === 'mdnahidislam6714@gmail.com')"
+      }
+    },
+    "counters": {
+      ".read": "true",
+      ".write": "true"
+    }
+  }
+}`;
+
+  const handleCopyRules = () => {
+    navigator.clipboard.writeText(rulesText);
+    setCopiedRules(true);
+    setTimeout(() => setCopiedRules(false), 3000);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-rose-50/10">
       <Header />
       
+      {rtdbError && showRulesAlert && (
+        <div className="bg-amber-50 border-y border-amber-200 text-amber-900 p-4 md:p-6 transition-all duration-300">
+          <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-start gap-4 justify-between">
+            <div className="flex-1">
+              <h3 className="text-base md:text-lg font-bold text-amber-800 flex items-center gap-2 mb-1.5 md:mb-2">
+                <span>⚠️</span> ফায়ারবেস পারমিশন ডিনাইড (Firebase Permission Denied)
+              </h3>
+              <p className="text-xs md:text-sm text-amber-950 mb-4 max-w-3xl leading-relaxed">
+                আপনার ফায়ারবেস রিয়েলটাইম ডাটাবেসে <code className="bg-amber-100 px-1.5 py-0.5 rounded text-amber-900 font-mono font-bold text-xs">/categories</code> নোডটি রিড করার পারমিশন ব্লকড রয়েছে। সমাধান করতে, আপনার <strong>Firebase Console</strong>-এ গিয়ে <strong>Realtime Database &gt; Rules</strong> ট্যাবটি ওপেন করুন এবং নিচের কোডটি পেস্ট করে <strong>Publish</strong> বাটনে ক্লিক করুন।
+              </p>
+              
+              <div className="relative mt-2 rounded-xl bg-gray-900 text-gray-100 p-4 font-mono text-[11px] md:text-xs overflow-x-auto max-h-[220px] shadow-inner">
+                <button 
+                  onClick={handleCopyRules}
+                  className="absolute top-2.5 right-2.5 bg-rose-500 hover:bg-rose-600 text-white font-bold py-1 px-2.5 rounded text-[10px] uppercase transition-colors"
+                >
+                  {copiedRules ? 'কপি হয়েছে!' : 'কোড কপি করুন'}
+                </button>
+                <pre>{rulesText}</pre>
+              </div>
+            </div>
+            <button 
+              onClick={() => setShowRulesAlert(false)}
+              className="text-amber-500 hover:text-amber-800 font-bold text-xs bg-amber-100 hover:bg-amber-200 px-2.5 py-1.5 rounded-lg shrink-0 transition-colors"
+            >
+              বন্ধ করুন (Dismiss)
+            </button>
+          </div>
+        </div>
+      )}
+
       <main className="flex-1 pb-16">
         {renderView()}
       </main>

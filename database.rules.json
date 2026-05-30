@@ -1,14 +1,16 @@
 {
   "rules": {
-    ".read": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'",
-    ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'",
-    
     "products": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
     },
     
     "categories": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    
+    "settings": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
     },

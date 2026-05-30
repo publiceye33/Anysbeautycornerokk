@@ -40,6 +40,8 @@ export const useStore = create<AppState>()(
       setCategories: (categories) => set({ categories }),
       logoUrl: '',
       setLogoUrl: (logoUrl) => set({ logoUrl }),
+      rtdbError: null,
+      setRtdbError: (rtdbError) => set({ rtdbError }),
     }),
     {
       name: 'anybeauty-store',

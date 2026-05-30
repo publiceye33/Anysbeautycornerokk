@@ -17,6 +17,9 @@ import LoadingScreen from '@/src/components/LoadingScreen';
 function HomeContent() {
   const router = useRouter();
   const { cart, setIsCartOpen, categories } = useStore();
+
+
+
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const cartItems = cart.reduce((sum, item) => sum + item.quantity, 0);
   const [products, setProducts] = useState<any[]>([]);
@@ -64,7 +67,16 @@ function HomeContent() {
 
   let displayProducts = products;
   if (filterCat && filterCat !== 'all') {
-    displayProducts = products.filter(p => p.category === filterCat);
+    const matchingCat = categories?.find(c => c.id === filterCat);
+    displayProducts = products.filter(p => {
+      if (!p.category) return false;
+      const pCat = String(p.category).trim();
+      return pCat === filterCat || 
+             (matchingCat && (
+               pCat === matchingCat.name?.trim() || 
+               pCat === matchingCat.id?.trim()
+             ));
+    });
   }
   if (searchQuery) {
     const query = searchQuery.toLowerCase();
