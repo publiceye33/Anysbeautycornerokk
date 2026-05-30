@@ -1,4 +1,15 @@
+import { useStore } from '@/src/lib/store';
+
 export default function Footer() {
+  const { categories } = useStore();
+  const displayCategories = categories && categories.length > 0 
+    ? categories 
+    : [
+        { id: 'cosmetics', name: 'মেকআপ' },
+        { id: 'skincare', name: 'স্কিনকেয়ার' },
+        { id: 'haircare', name: 'হেয়ারকেয়ার' }
+      ];
+
   return (
     <footer className="bg-rose-500 text-white py-8 md:py-12 mt-auto">
       <div className="container mx-auto px-4 md:px-6 max-w-7xl">
@@ -33,9 +44,13 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-2">
             <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 md:mb-5 opacity-60">Categories</h4>
             <ul className="space-y-2.5 md:space-y-3 text-sm md:text-base font-medium">
-              <li><a href="#/?filter=cosmetics" className="hover:opacity-60 transition-opacity">মেকআপ</a></li>
-              <li><a href="#/?filter=skincare" className="hover:opacity-60 transition-opacity">স্কিনকেয়ার</a></li>
-              <li><a href="#/?filter=haircare" className="hover:opacity-60 transition-opacity">হেয়ারকেয়ার</a></li>
+              {displayCategories.slice(0, 5).map((item, idx) => (
+                <li key={item.id || idx}>
+                  <a href={`#/?filter=${item.id}`} className="hover:opacity-60 transition-opacity capitalize">
+                    {item.name}
+                  </a>
+                </li>
+              ))}
             </ul>
           </div>
           <div className="col-span-2 md:col-span-3">

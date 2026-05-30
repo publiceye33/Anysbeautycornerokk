@@ -10,6 +10,7 @@ import {
   X,
   User,
   ChevronRight,
+  ChevronDown,
   Bell,
   LogOut
 } from 'lucide-react';
@@ -36,6 +37,7 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isMobileCategoriesOpen, setIsMobileCategoriesOpen] = useState(true);
   const [notifications, setNotifications] = useState<any[]>([]);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -218,18 +220,32 @@ export default function Header() {
             <a href="#/" className="hover:opacity-100 transition-opacity">
               হোম
             </a>
-            <a
-              href="#/?filter=skincare"
-              className="hover:opacity-100 transition-opacity"
-            >
-              স্কিনকেয়ার
-            </a>
-            <a
-              href="#/?filter=cosmetics"
-              className="hover:opacity-100 transition-opacity"
-            >
-              মেকআপ
-            </a>
+            {categories && categories.length > 0 ? (
+              categories.map((item, idx) => (
+                <a
+                  key={item.id || idx}
+                  href={`#/?filter=${item.id}`}
+                  className="hover:opacity-100 transition-opacity capitalize"
+                >
+                  {item.name}
+                </a>
+              ))
+            ) : (
+              <>
+                <a
+                  href="#/?filter=skincare"
+                  className="hover:opacity-100 transition-opacity"
+                >
+                  স্কিনকেয়ার
+                </a>
+                <a
+                  href="#/?filter=cosmetics"
+                  className="hover:opacity-100 transition-opacity"
+                >
+                  মেকআপ
+                </a>
+              </>
+            )}
             <a
               href="#/order-track"
               className="hover:opacity-100 transition-opacity"
@@ -520,49 +536,70 @@ export default function Header() {
                     <div className="h-px flex-1 bg-gray-100 ml-4"></div>
                   </div>
                   <ul className="space-y-2.5">
-                    {[
-                      { label: "হোম পেইজ", href: "#/" },
-                      { label: "অর্ডার ট্র্যাক করুন", href: "#/order-track" },
-                    ].map((item, idx) => (
-                      <li key={idx}>
-                        <a
-                          href={item.href}
-                          className="flex items-center group p-4 border border-transparent rounded-[1.25rem] hover:bg-gray-50 transition-all font-bold text-gray-700 hover:text-rose-500 text-sm"
-                          onClick={() => setIsMobileMenuOpen(false)}
+                    <li>
+                      <a
+                        href="#/"
+                        className="flex items-center group p-4 border border-transparent rounded-[1.25rem] hover:bg-gray-50 transition-all font-bold text-gray-700 hover:text-rose-500 text-sm"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span className="flex-1">হোম পেইজ</span>
+                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                      </a>
+                    </li>
+
+                    <li>
+                      <div className="border border-gray-100 rounded-[1.25rem] overflow-hidden bg-gray-50/50">
+                        <button
+                          onClick={() => setIsMobileCategoriesOpen(!isMobileCategoriesOpen)}
+                          className="w-full flex items-center justify-between p-4 font-bold text-gray-700 hover:text-rose-500 text-sm bg-white"
                         >
-                          <span className="flex-1">{item.label}</span>
-                          <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                        </a>
-                      </li>
-                    ))}
+                          <span>প্রডাক্ট সমূহ</span>
+                          <ChevronDown className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isMobileCategoriesOpen ? 'rotate-180 text-rose-500' : ''}`} />
+                        </button>
+                        
+                        <AnimatePresence initial={false}>
+                          {isMobileCategoriesOpen && (
+                            <motion.ul
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              className="divide-y divide-gray-100 overflow-hidden bg-white border-t border-gray-50"
+                            >
+                              {(categories && categories.length > 0 ? categories : [
+                                { id: 'skincare', name: 'স্কিনকেয়ার', icon: '✨' },
+                                { id: 'cosmetics', name: 'মেকআপ', icon: '💄' },
+                                { id: 'haircare', name: 'হেয়ারকেয়ার', icon: '🧴' }
+                              ]).map((item, idx) => (
+                                <li key={item.id || idx}>
+                                  <a
+                                    href={`#/?filter=${item.id}`}
+                                    className="flex items-center group p-4 hover:bg-gray-50 transition-all font-semibold text-gray-600 hover:text-rose-500 text-xs pl-6"
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                  >
+                                    <span className="mr-2.5 text-sm shrink-0">{item.icon || '🌸'}</span>
+                                    <span className="flex-grow capitalize text-left">{item.name}</span>
+                                    <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:translate-x-1 transition-all" />
+                                  </a>
+                                </li>
+                              ))}
+                            </motion.ul>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </li>
+
+                    <li>
+                      <a
+                        href="#/order-track"
+                        className="flex items-center group p-4 border border-transparent rounded-[1.25rem] hover:bg-gray-50 transition-all font-bold text-gray-700 hover:text-rose-500 text-sm"
+                        onClick={() => setIsMobileMenuOpen(false)}
+                      >
+                        <span className="flex-1">অর্ডার ট্র্যাক করুন</span>
+                        <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                      </a>
+                    </li>
                   </ul>
                 </div>
-
-                {categories && categories.length > 0 && (
-                  <div className="space-y-5">
-                    <div className="flex items-center justify-between px-1">
-                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
-                        ক্যাটাগরি
-                      </p>
-                      <div className="h-px flex-1 bg-gray-100 ml-4"></div>
-                    </div>
-                    <ul className="space-y-2.5">
-                      {categories.map((item, idx) => (
-                        <li key={item.id || idx}>
-                          <a
-                            href={`#/?filter=${item.id}`}
-                            className="flex items-center group p-4 border border-transparent rounded-[1.25rem] hover:bg-gray-50 transition-all font-bold text-gray-700 hover:text-rose-500 text-sm"
-                            onClick={() => setIsMobileMenuOpen(false)}
-                          >
-                            {item.icon && <span className="mr-3 text-base flex items-center justify-center shrink-0">{item.icon}</span>}
-                            <span className="flex-1 capitalize">{item.name}</span>
-                            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
 
                 {user && (
                   <button

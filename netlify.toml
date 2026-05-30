@@ -9,6 +9,13 @@
   status = 200
   force = true
 
+# Proxy Firebase Auth traffic to Firebase for custom authDomain
+[[redirects]]
+  from = "/__/auth/*"
+  to = "https://nahid-6714.firebaseapp.com/__/auth/:splat"
+  status = 200
+  force = true
+
 # SPA client-side fallback redirect
 [[redirects]]
   from = "/*"

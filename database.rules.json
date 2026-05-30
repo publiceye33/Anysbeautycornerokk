@@ -8,6 +8,11 @@
       ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
     },
     
+    "categories": {
+      ".read": "true",
+      ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
+    },
+    
     "events": {
       ".read": "true",
       ".write": "auth != null && auth.token.email === 'mdnahidislam6714@gmail.com'"
