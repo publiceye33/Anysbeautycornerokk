@@ -25,6 +25,8 @@ export default function Header() {
     setIsMobileMenuOpen,
     user,
     setUser,
+    logoUrl,
+    categories,
   } = useStore();
   const router = useRouter();
   
@@ -220,7 +222,7 @@ export default function Header() {
           >
             <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-xl sm:mr-3 mr-2 bg-white overflow-hidden relative shadow-md transform rotate-3 group-hover:rotate-0 transition-transform shrink-0 flex items-center justify-center">
               <img
-                src="/logo.png"
+                src={logoUrl || "/logo.png"}
                 alt="Logo"
                 className="w-full h-full object-contain p-1"
                 referrerPolicy="no-referrer"
@@ -466,7 +468,7 @@ export default function Header() {
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 bg-white rounded-xl overflow-hidden relative shadow-sm transform -rotate-3 flex items-center justify-center">
                     <img
-                      src="/logo.png"
+                      src={logoUrl || "/logo.png"}
                       alt="Logo"
                       className="w-full h-full object-contain p-1"
                       referrerPolicy="no-referrer"
@@ -541,12 +543,6 @@ export default function Header() {
                   <ul className="space-y-2.5">
                     {[
                       { label: "হোম পেইজ", href: "#/" },
-                      {
-                        label: "স্কিনকেয়ার কালেকশন",
-                        href: "#/?filter=skincare",
-                      },
-                      { label: "মেকআপ ও কসমেটিকস", href: "#/?filter=cosmetics" },
-                      { label: "হেয়ারকেয়ার টিপস", href: "#/?filter=haircare" },
                       { label: "অর্ডার ট্র্যাক করুন", href: "#/order-track" },
                     ].map((item, idx) => (
                       <li key={idx}>
@@ -563,6 +559,32 @@ export default function Header() {
                   </ul>
                 </div>
 
+                {categories && categories.length > 0 && (
+                  <div className="space-y-5">
+                    <div className="flex items-center justify-between px-1">
+                      <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">
+                        ক্যাটাগরি
+                      </p>
+                      <div className="h-px flex-1 bg-gray-100 ml-4"></div>
+                    </div>
+                    <ul className="space-y-2.5">
+                      {categories.map((item, idx) => (
+                        <li key={item.id || idx}>
+                          <a
+                            href={`#/?filter=${item.id}`}
+                            className="flex items-center group p-4 border border-transparent rounded-[1.25rem] hover:bg-gray-50 transition-all font-bold text-gray-700 hover:text-rose-500 text-sm"
+                            onClick={() => setIsMobileMenuOpen(false)}
+                          >
+                            {item.icon && <span className="mr-3 text-base flex items-center justify-center shrink-0">{item.icon}</span>}
+                            <span className="flex-1 capitalize">{item.name}</span>
+                            <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
                 {user && (
                   <button
                     onClick={handleLogout}
@@ -577,7 +599,7 @@ export default function Header() {
                 <div className="flex items-center gap-2 mb-4">
                   <div className="h-8 w-8 rounded-xl bg-white overflow-hidden relative shadow-sm flex items-center justify-center">
                     <img
-                      src="/logo.png"
+                      src={logoUrl || "/logo.png"}
                       alt="Logo"
                       className="w-full h-full object-contain p-1"
                       referrerPolicy="no-referrer"

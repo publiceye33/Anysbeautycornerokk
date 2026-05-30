@@ -1,4 +1,7 @@
+import { useStore } from '@/src/lib/store';
+
 export default function Footer() {
+  const { logoUrl } = useStore();
   return (
     <footer className="bg-rose-500 text-white py-8 md:py-12 mt-auto">
       <div className="container mx-auto px-4 md:px-6 max-w-7xl">
@@ -7,7 +10,7 @@ export default function Footer() {
             <div className="flex items-center gap-3 mb-4">
               <div className="h-10 w-10 bg-white rounded-xl overflow-hidden relative shadow-sm flex items-center justify-center">
                 <img 
-                  src="/logo.png" 
+                  src={logoUrl || "/logo.png"} 
                   alt="Logo" 
                   className="w-full h-full object-contain p-1"
                   referrerPolicy="no-referrer"

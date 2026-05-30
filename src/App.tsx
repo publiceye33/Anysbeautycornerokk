@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
 import { usePathname } from '@/src/lib/navigation';
 import { useStore } from '@/src/lib/store';
-import { auth } from '@/src/lib/firebase';
+import { auth, database } from '@/src/lib/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import { ref, onValue } from 'firebase/database';
 
 // Layout & UI components
 import Header from '@/src/components/Header';
@@ -20,7 +21,40 @@ import NotificationsView from '@/src/components/views/Notifications';
 
 export default function App() {
   const pathname = usePathname();
-  const { setUser } = useStore();
+  const { setUser, setLogoUrl, setCategories } = useStore();
+
+  // Listen to categories and logoUrl in Firebase RTDB
+  useEffect(() => {
+    const logoRef = ref(database, 'settings/logoUrl');
+    const unsubLogo = onValue(logoRef, (snapshot) => {
+      if (snapshot.exists()) {
+        setLogoUrl(snapshot.val() || '');
+      } else {
+        setLogoUrl('');
+      }
+    });
+
+    const categoriesRef = ref(database, 'categories');
+    const unsubCats = onValue(categoriesRef, (snapshot) => {
+      if (snapshot.exists()) {
+        const val = snapshot.val();
+        let list: any[] = [];
+        if (Array.isArray(val)) {
+          list = val.filter(Boolean);
+        } else if (typeof val === 'object') {
+          list = Object.keys(val).map(k => ({ id: k, ...val[k] }));
+        }
+        setCategories(list);
+      } else {
+        setCategories([]);
+      }
+    });
+
+    return () => {
+      unsubLogo();
+      unsubCats();
+    };
+  }, [setLogoUrl, setCategories]);
 
   // Scroll Restoration Manager
   useEffect(() => {

@@ -21,12 +21,20 @@ export interface CartItem {
 
 export type DeliveryLocation = 'insideDhaka' | 'outsideDhaka';
 
+export interface Category {
+  id: string;
+  name: string;
+  icon?: string;
+}
+
 export interface AppState {
   cart: CartItem[];
   isCartOpen: boolean;
   isMobileMenuOpen: boolean;
   user: any | null;
   deliveryLocation: DeliveryLocation;
+  logoUrl?: string;
+  categories?: Category[];
   addToCart: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, amount: number) => void;
@@ -35,4 +43,6 @@ export interface AppState {
   setIsMobileMenuOpen: (isOpen: boolean) => void;
   setUser: (user: any) => void;
   setDeliveryLocation: (location: DeliveryLocation) => void;
+  setLogoUrl: (url: string) => void;
+  setCategories: (categories: Category[]) => void;
 }
