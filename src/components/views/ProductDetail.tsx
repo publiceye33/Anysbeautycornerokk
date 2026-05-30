@@ -53,7 +53,7 @@ export default function ProductDetail({ id }: { id: string }) {
           
           const ogDesc = document.querySelector('meta[property="og:description"]');
           if (ogDesc) {
-            ogDesc.setAttribute('content', data.description || 'Any\'s Beauty Corner বাংলাদেশে সেরা ও ১০০% অথেন্টিক মেকআপ, স্কিনকেয়ার এবং কসমেটিকস প্রোডাক্টের বিশ্বস্ত অনলাইন বিউটি শপ।');
+            ogDesc.setAttribute('content', data.description || 'Any\'s Beauty Corner ১০০% অথেন্টিক মেকআপ, স্কিনকেয়ার এবং কসমেটিকস প্রোডাক্টের বিশ্বস্ত অনলাইন বিউটি শপ।');
           }
           
           const ogImg = document.querySelector('meta[property="og:image"]');
@@ -69,7 +69,7 @@ export default function ProductDetail({ id }: { id: string }) {
 
           const twitterDesc = document.querySelector('meta[property="twitter:description"]');
           if (twitterDesc) {
-            twitterDesc.setAttribute('content', data.description || 'Any\'s Beauty Corner বাংলাদেশে সেরা ও ১০০% অথেন্টিক মেকআপ, স্কিনকেয়ার এবং কসমেটিকস প্রোডাক্টের বিশ্বস্ত অনলাইন বিউটি শপ।');
+            twitterDesc.setAttribute('content', data.description || 'Any\'s Beauty Corner ১০০% অথেন্টিক মেকআপ, স্কিনকেয়ার এবং কসমেটিকস প্রোডাক্টের বিশ্বস্ত অনলাইন বিউটি শপ।');
           }
 
           const twitterImg = document.querySelector('meta[property="twitter:image"]');

@@ -103,7 +103,7 @@ export default function App() {
   // Dynamic document.title update based on pathname route changes
   useEffect(() => {
     if (pathname === '/') {
-      document.title = "Any's Beauty Corner | সেরা বিউটি প্রোডাক্ট";
+      document.title = "Any's Beauty Corner | ১০০% অথেন্টিক বিউটি প্রোডাক্ট";
     } else if (pathname === '/order-form') {
       document.title = "অর্ডার করুন | Any's Beauty Corner";
     } else if (pathname === '/order-track') {
